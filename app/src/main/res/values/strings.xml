@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">miograph</string>
+
+    <string name="search">Search</string>
+    <string name="menu_fragment_label">Menu</string>
+    <string name="info">Info</string>
+    <string name="envelope">EMG</string>
+
+    <string name="start_search">Start search</string>
+
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+
+    <string name="disconnect">Disconnect</string>
+    <string name="connect">Connect</string>
+
+    <string name="dev_state_title">State:</string>
+    <string name="dev_power_title">Power:</string>
+
+    <string name="dev_state_connected">Connected</string>
+    <string name="dev_state_disconnected">Disconnected</string>
+    <string name="dev_power_empty">-</string>
+    <string name="dev_power_prc">%1$d %%</string>
+
+    <string name="connected_sensors">Connected sensors: %d</string>
+</resources>

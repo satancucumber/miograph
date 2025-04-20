@@ -1,0 +1,53 @@
+[versions]
+agp = "8.6.0"
+androidplotCore = "1.5.10"
+androidxJunit = "1.1.5"
+callibriecg = "1.0.0"
+constraintlayout = "2.2.1"
+coreKtxVersion = "1.13.1"
+emotionalStateArtifacts = "1.0.1"
+espressoCoreVersion = "3.5.1"
+kotlin = "1.9.0"
+coreKtx = "1.16.0"
+junit = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+appcompat = "1.7.0"
+kotlinxCoroutinesAndroid = "1.7.3"
+legacySupportV4 = "1.0.0"
+lifecycleLivedataKtx = "2.8.7"
+material = "1.12.0"
+navVersion = "2.8.0"
+neurosdk2 = "1.0.6.29"
+signalfilters = "1.0"
+
+[libraries]
+androidplot-core = { module = "com.androidplot:androidplot-core", version.ref = "androidplotCore" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-ktx-v1131 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
+androidx-espresso-core-v351 = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
+androidx-junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
+androidx-legacy-support-v4 = { module = "androidx.legacy:legacy-support-v4", version.ref = "legacySupportV4" }
+androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleLivedataKtx" }
+androidx-navigation-dynamic-features-fragment = { module = "androidx.navigation:navigation-dynamic-features-fragment", version.ref = "navVersion" }
+androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navVersion" }
+androidx-navigation-testing = { module = "androidx.navigation:navigation-testing", version.ref = "navVersion" }
+androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navVersion" }
+callibriecg = { module = "com.github.BrainbitLLC:CallibriECG", version.ref = "callibriecg" }
+emotional-state-artifacts = { module = "com.github.BrainbitLLC:Emotional-state-artifacts", version.ref = "emotionalStateArtifacts" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+neurosdk2 = { module = "com.github.BrainbitLLC:neurosdk2", version.ref = "neurosdk2" }
+signalfilters = { module = "com.github.BrainbitLLC:SignalFilters", version.ref = "signalfilters" }
+spectrumlib = { module = "com.github.BrainbitLLC:SpectrumLib", version.ref = "emotionalStateArtifacts" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
