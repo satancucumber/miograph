@@ -243,7 +243,7 @@ object CallibriController {
     }
     //</editor-fold>
 
-    @OptIn(DelicateCoroutinesApi::class)
+    @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
     private fun executeCommand(command: SensorCommand) =
         runBlocking(newSingleThreadContext("dedicatedThread")) {
             try {

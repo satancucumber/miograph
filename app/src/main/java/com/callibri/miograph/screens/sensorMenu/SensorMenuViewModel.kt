@@ -11,8 +11,8 @@ import com.callibri.miograph.callibri.CallibriController
 class SensorMenuViewModel : ViewModel() {
     var connected = ObservableBoolean(false)
     var hasDevice = ObservableBoolean(CallibriController.hasDevice)
-    var hasEnvelope = ObservableBoolean(CallibriController.isEnvelope!!)
-    var hasSignal = ObservableBoolean(CallibriController.isSignal!!)
+    var hasEnvelope = ObservableBoolean(CallibriController.isEnvelope)
+    var hasSignal = ObservableBoolean(CallibriController.isSignal)
 
     fun reconnect(){
         if(CallibriController.connectionState == SensorState.StateInRange){

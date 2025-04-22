@@ -13,6 +13,7 @@ import com.neurosdk2.neuro.types.SensorState
 import com.callibri.miograph.callibri.CallibriController
 import com.callibri.miograph.databinding.ActivityMainBinding
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
