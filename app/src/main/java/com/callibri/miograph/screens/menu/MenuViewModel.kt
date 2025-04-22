@@ -5,8 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.callibri.miograph.callibri.CallibriController
-import com.callibri.miograph.screens.menu.DeviceListItem
-import com.neurosdk2.neuro.types.SensorInfo
 import com.neurosdk2.neuro.types.SensorState
 
 class MenuViewModel : ViewModel() {
@@ -32,11 +30,5 @@ class MenuViewModel : ViewModel() {
             )
         }
         _devices.postValue(devices)
-    }
-
-    fun updateDeviceInfo() {
-        connected.set(CallibriController.connectionState == SensorState.StateInRange)
-        hasDevice.set(CallibriController.hasDevice)
-        updateConnectedDevices()
     }
 }

@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.callibri.miograph.R
 import com.callibri.miograph.callibri.CallibriController
 import com.callibri.miograph.databinding.FragmentMenuBinding
@@ -41,9 +40,9 @@ class MenuFragment : Fragment() {
         // Инициализация адаптера с добавлением ViewModel и обработчика Info
         devicesListAdapter = DevicesListAdapter(
             devices = mutableListOf(),
-            onConnectClick = { device -> reconnect() },
-            onDisconnectClick = { device -> reconnect() },
-            onInfoClick = { device -> showDeviceInfo() },
+            onConnectClick = { reconnect() },
+            onDisconnectClick = { reconnect() },
+            onInfoClick = { showDeviceInfo() },
             isConnectedProvider = { viewModel.connected.get() }
         )
 

@@ -3,9 +3,7 @@ package com.callibri.miograph.callibri
 import com.neurosdk2.neuro.Callibri
 import com.neurosdk2.neuro.Scanner
 import com.neurosdk2.neuro.Sensor
-import com.neurosdk2.neuro.interfaces.CallibriElectrodeStateChanged
 import com.neurosdk2.neuro.interfaces.CallibriEnvelopeDataReceived
-import com.neurosdk2.neuro.interfaces.CallibriSignalDataReceived
 import com.neurosdk2.neuro.types.*
 import kotlinx.coroutines.runBlocking
 import kotlin.concurrent.thread
@@ -13,7 +11,6 @@ import kotlinx.coroutines.*
 
 object CallibriController {
 
-    //<editor-fold desc="Scanner">
     var scanner: Scanner? = null
 
     fun startSearch(sensorsChanged: (Scanner, List<SensorInfo>) -> Unit) {
@@ -37,9 +34,7 @@ object CallibriController {
             ex.printStackTrace()
         }
     }
-    //</editor-fold>
 
-    //<editor-fold desc="Sensor state">
     private var sensor: Callibri? = null
 
     var connectionStateChanged: (SensorState) -> Unit = { }
@@ -50,7 +45,7 @@ object CallibriController {
         thread {
             try {
                 sensor = scanner?.createSensor(sensorInfo) as Callibri
-                currentSensorInfo = sensorInfo // Сохраняем информацию о сенсоре
+                currentSensorInfo = sensorInfo
 
                 if (sensor != null) {
                     sensor?.sensorStateChanged = Sensor.SensorStateChanged(connectionStateChanged)
@@ -82,7 +77,6 @@ object CallibriController {
             thread {
                 try {
                     sensor?.connect()
-                    // Устанавливаем коллбэки после подключения
                     sensor?.sensorStateChanged = Sensor.SensorStateChanged(connectionStateChanged)
                     sensor?.batteryChanged = Sensor.BatteryChanged(batteryChanged)
                     onConnectionResult(sensor!!.state)
@@ -107,7 +101,7 @@ object CallibriController {
         try {
             sensor?.close()
             sensor = null
-            currentSensorInfo = null // Очищаем при закрытии
+            currentSensorInfo = null
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
@@ -118,22 +112,6 @@ object CallibriController {
     val hasDevice: Boolean
         get() {
             return sensor != null
-        }
-    //</editor-fold>
-
-    //<editor-fold desc="Parameters">
-    val isSignal: Boolean
-        get() {
-            return if (connectionState == SensorState.StateInRange) sensor!!.isSupportedCommand(
-                SensorCommand.StartSignal
-            ) else false
-        }
-
-    val isEnvelope: Boolean
-        get() {
-            return if (connectionState == SensorState.StateInRange) sensor!!.isSupportedCommand(
-                SensorCommand.StartEnvelope
-            ) else false
         }
 
     fun fullInfo(): String {
@@ -217,20 +195,6 @@ object CallibriController {
         return info
     }
 
-    //<editor-fold desc="Electrodes">
-    fun startElectrodes(electrodesStateChanged: (CallibriElectrodeState) -> Unit) {
-        sensor?.callibriElectrodeStateChanged =
-            CallibriElectrodeStateChanged(electrodesStateChanged)
-        executeCommand(SensorCommand.StartSignal)
-    }
-
-    fun stopElectrodes() {
-        sensor?.callibriElectrodeStateChanged = null
-        executeCommand(SensorCommand.StopSignal)
-    }
-    //</editor-fold>
-
-    //<editor-fold desc="Envelope">
     fun startEnvelope(envelopeReceived: (Array<CallibriEnvelopeData>) -> Unit) {
         sensor?.callibriEnvelopeDataReceived = CallibriEnvelopeDataReceived(envelopeReceived)
         executeCommand(SensorCommand.StartEnvelope)
@@ -241,7 +205,6 @@ object CallibriController {
 
         executeCommand(SensorCommand.StopEnvelope)
     }
-    //</editor-fold>
 
     @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
     private fun executeCommand(command: SensorCommand) =

@@ -17,8 +17,8 @@
 
         <Button
             android:id="@+id/envelopeButton"
-            android:layout_width="383dp"
-            android:layout_height="48dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="@{viewModel.started ? @string/stop : @string/start}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
