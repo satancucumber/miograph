@@ -15,4 +15,7 @@
     <color name="colorDevState">#46474D</color>
     <color name="colorDevStateTitle">#FFF</color>
     <color name="colorDevStateValue">#00DE00</color>
+
+    <color name="border_color">#46474D</color>
+    <color name="background_color">#FFF</color>
 </resources>

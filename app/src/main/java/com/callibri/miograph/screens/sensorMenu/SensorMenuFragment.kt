@@ -42,10 +42,6 @@ class SensorMenuFragment : Fragment() {
             }
         }
 
-        binding.buttonEnvelope.setOnClickListener {
-            findNavController().navigate(R.id.action_SensorMenuFragment_to_envelopeFragment)
-        }
-
         binding.buttonCurrentReconect.setOnClickListener {
             if(CallibriController.hasDevice) viewModel.reconnect()
         }

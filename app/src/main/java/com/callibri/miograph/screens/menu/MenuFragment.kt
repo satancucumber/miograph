@@ -47,6 +47,10 @@ class MenuFragment : Fragment() {
             findNavController().navigate(R.id.action_MenuFragment_to_SearchFragment)
         }
 
+        binding.buttonEnvelope.setOnClickListener {
+            findNavController().navigate(R.id.action_MenuFragment_to_envelopeFragment)
+        }
+
         val adapter = SensorListAdapter().apply {
             submitList(viewModel.connectedSensors)
             setOnItemClickListener { sensor ->

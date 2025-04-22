@@ -38,13 +38,6 @@
                     android:text="@string/info" />
 
                 <Button
-                    android:id="@+id/button_envelope"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:enabled="@{viewModel.connected}"
-                    android:text="@string/envelope" />
-
-                <Button
                     android:id="@+id/button_current_reconect"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
