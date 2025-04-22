@@ -72,6 +72,6 @@ class MenuFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        viewModel.updateDeviceInfo()
+        viewModel.updateDeviceInfo() 
     }
 }

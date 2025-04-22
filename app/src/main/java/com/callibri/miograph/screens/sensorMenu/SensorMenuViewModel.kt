@@ -21,6 +21,8 @@ class SensorMenuViewModel : ViewModel() {
         }else {
             CallibriController.connectCurrent(onConnectionResult = {
                 connected.set(it == SensorState.StateInRange)
+                // Обновляем информацию об устройстве
+                updateDeviceInfo()
             })
         }
     }

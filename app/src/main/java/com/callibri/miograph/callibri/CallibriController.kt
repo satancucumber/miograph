@@ -82,6 +82,9 @@ object CallibriController {
             thread {
                 try {
                     sensor?.connect()
+                    // Устанавливаем коллбэки после подключения
+                    sensor?.sensorStateChanged = Sensor.SensorStateChanged(connectionStateChanged)
+                    sensor?.batteryChanged = Sensor.BatteryChanged(batteryChanged)
                     onConnectionResult(sensor!!.state)
                 } catch (ex: Exception) {
                     ex.printStackTrace()
