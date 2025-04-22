@@ -23,7 +23,7 @@ class SearchScreenViewModel : ViewModel(){
             CallibriController.disconnectCurrent()
             CallibriController.closeSensor()
 
-            CallibriController.startSearch(sensorsChanged = { scanner, infos ->
+            CallibriController.startSearch(sensorsChanged = { _, infos ->
                 run {
                     _sensors.postValue(infos)
                 }

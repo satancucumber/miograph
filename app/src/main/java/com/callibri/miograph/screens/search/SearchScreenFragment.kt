@@ -2,8 +2,6 @@ package com.callibri.miograph.screens.search
 
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,121 +11,107 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.neurosdk2.helpers.PermissionHelper
 import com.neurosdk2.neuro.types.SensorState
 import com.callibri.miograph.R
 import com.callibri.miograph.callibri.CallibriController
 import com.callibri.miograph.databinding.FragmentSearchScreenBinding
 
-/**
- * A simple [Fragment] subclass as the default destination in the navigation.
- */
 class SearchScreenFragment : Fragment() {
 
     private var _binding: FragmentSearchScreenBinding? = null
     private var _viewModel: SearchScreenViewModel? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
     private val viewModel get() = _viewModel!!
 
-    private val devicesListAdapter = DevicesListAdapter(mutableListOf())
+    private lateinit var devicesListAdapter: DevicesListAdapter
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSearchScreenBinding.inflate(inflater, container, false)
         _viewModel = ViewModelProvider(this).get(SearchScreenViewModel::class.java)
-
         return binding.root
-
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.viewModel = viewModel
+        setupRecyclerView()
+        setupObservers()
+        setupButtonListeners()
+    }
 
-        val llm = LinearLayoutManager(context)
-        llm.orientation = LinearLayoutManager.VERTICAL
-        binding.searchDevicesList.layoutManager = llm
-        binding.searchDevicesList.adapter = devicesListAdapter
+    private fun setupRecyclerView() {
+        devicesListAdapter = DevicesListAdapter(
+            devices = mutableListOf(),
+            onConnectClick = { device -> handleConnect(device)}
+        )
 
-        binding.searchDevicesList.setOnItemClickListener {
-            Handler(Looper.getMainLooper()).post {
-                val deviceNumber = it
-
-                devicesListAdapter.devices[deviceNumber].inProgress = true
-                devicesListAdapter.notifyItemChanged(deviceNumber)
-
-                CallibriController.createAndConnect(
-                    devicesListAdapter.devices[deviceNumber].sInfo,
-                    onConnectionResult = {
-                        Handler(Looper.getMainLooper()).post {
-
-                            if (it == SensorState.StateInRange) {
-                                findNavController().popBackStack(R.id.MenuFragment, false)
-                            } else {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Device connection fail!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-
-                            devicesListAdapter.devices[deviceNumber].inProgress = false
-                            devicesListAdapter.notifyItemChanged(deviceNumber)
-                        }
-                    })
-            }
-
+        binding.searchDevicesList.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = devicesListAdapter
         }
+    }
 
+    private fun setupObservers() {
+        viewModel.sensors.observe(viewLifecycleOwner) { sensors ->
+            val deviceList = sensors.map { sensorInfo ->
+                DeviceListItem(
+                    name = sensorInfo.name,
+                    address = sensorInfo.address,
+                    inProgress = false,
+                    sInfo = sensorInfo
+                )
+            }
+            devicesListAdapter.updateDevices(deviceList)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun setupButtonListeners() {
         binding.buttonRestart.setOnClickListener {
             if (!PermissionHelper.HasAllPermissions(requireContext())) {
-                PermissionHelper.RequestPermissions(
-                    requireContext()
-                ) { grantedPermissions, deniedPermissions, deniedPermanentlyPermissions -> viewModel.onSearchClicked() }
+                PermissionHelper.RequestPermissions(requireContext()) {
+                        _, _, _ -> viewModel.onSearchClicked()
+                }
             } else {
                 viewModel.onSearchClicked()
             }
         }
+    }
 
-        viewModel.sensors.observe(viewLifecycleOwner) {
-            devicesListAdapter.devices.clear()
-            for (device in it) {
-                devicesListAdapter.devices.add(
-                    DeviceListItem(
-                        device.name,
-                        device.address,
-                        false,
-                        device
-                    )
-                )
+    private fun handleConnect(device: DeviceListItem) {
+        device.inProgress = true
+        devicesListAdapter.notifyItemChanged(devicesListAdapter.devices.indexOf(device))
+
+        CallibriController.createAndConnect(device.sInfo) { state ->
+            activity?.runOnUiThread {
+                device.inProgress = false
+                devicesListAdapter.notifyItemChanged(devicesListAdapter.devices.indexOf(device))
+
+                when (state) {
+                    SensorState.StateInRange -> {
+                        findNavController().popBackStack(R.id.MenuFragment, false)
+                    }
+                    else -> {
+                        Toast.makeText(
+                            requireContext(),
+                            "Device connection failed!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
             }
-            devicesListAdapter.notifyDataSetChanged()
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-
         viewModel.close()
-    }
-
-    private inline fun RecyclerView.setOnItemClickListener(crossinline listener: (position: Int) -> Unit) {
-        addOnItemTouchListener(
-            RecyclerItemClickListener(this,
-                object : RecyclerItemClickListener.OnItemClickListener {
-                    override fun onItemClick(view: View, position: Int) {
-                        listener(position)
-                    }
-                })
-        )
     }
 }

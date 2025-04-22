@@ -11,23 +11,14 @@
         android:label="@string/menu_fragment_label"
         tools:layout="@layout/fragment_menu">
         <action
+            android:id="@+id/action_MenuFragment_to_infoFragment"
+            app:destination="@id/infoFragment" />
+        <action
             android:id="@+id/action_MenuFragment_to_SearchFragment"
             app:destination="@id/SearchFragment" />
         <action
-            android:id="@+id/action_MenuFragment_to_SensorMenuFragment"
-            app:destination="@id/SensorMenuFragment"/>
-        <action
             android:id="@+id/action_MenuFragment_to_envelopeFragment"
             app:destination="@id/envelopeFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/SensorMenuFragment"
-        android:name="com.callibri.miograph.screens.sensorMenu.SensorMenuFragment"
-        android:label="Sensor menu"
-        tools:layout="@layout/fragment_sensor_menu">
-        <action
-            android:id="@+id/action_SensorMenuFragment_to_infoFragment"
-            app:destination="@id/infoFragment" />
     </fragment>
     <fragment
         android:id="@+id/SearchFragment"

@@ -1,33 +1,42 @@
 package com.callibri.miograph.screens.menu
 
-import android.widget.Toast
-import androidx.databinding.ObservableArrayList
 import androidx.databinding.ObservableBoolean
-import androidx.databinding.ObservableInt
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.navigation.fragment.findNavController
+import com.callibri.miograph.callibri.CallibriController
+import com.callibri.miograph.screens.menu.DeviceListItem
 import com.neurosdk2.neuro.types.SensorInfo
 import com.neurosdk2.neuro.types.SensorState
-import com.callibri.miograph.R
-import com.callibri.miograph.callibri.CallibriController
 
 class MenuViewModel : ViewModel() {
     var connected = ObservableBoolean(false)
     var hasDevice = ObservableBoolean(CallibriController.hasDevice)
-    val connectedSensors = ObservableArrayList<SensorInfo>()
-    val sensorCount = ObservableInt(0)
+
+    private val _devices = MutableLiveData<List<DeviceListItem>>()
+    val devices: LiveData<List<DeviceListItem>> get() = _devices
+
+    fun updateConnectedDevices() {
+        connected.set(CallibriController.connectionState == SensorState.StateInRange)
+        hasDevice.set(CallibriController.hasDevice)
+
+        val devices = mutableListOf<DeviceListItem>()
+        CallibriController.currentSensorInfo?.let { sensorInfo ->
+            devices.add(
+                DeviceListItem(
+                    name = sensorInfo.name,
+                    address = sensorInfo.address,
+                    inProgress = false,
+                    sInfo = sensorInfo
+                )
+            )
+        }
+        _devices.postValue(devices)
+    }
 
     fun updateDeviceInfo() {
         connected.set(CallibriController.connectionState == SensorState.StateInRange)
         hasDevice.set(CallibriController.hasDevice)
-        updateConnectedSensors()
-    }
-
-    private fun updateConnectedSensors() {
-        connectedSensors.clear()
-        CallibriController.currentSensorInfo?.let {
-            connectedSensors.add(it)
-        }
-        sensorCount.set(connectedSensors.size)
+        updateConnectedDevices()
     }
 }

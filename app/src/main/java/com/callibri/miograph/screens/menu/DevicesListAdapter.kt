@@ -1,4 +1,4 @@
-package com.callibri.miograph.screens.search
+package com.callibri.miograph.screens.menu
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
@@ -7,18 +7,18 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.callibri.miograph.R
-import com.callibri.miograph.databinding.DeviceListItemSearchBinding
+import com.callibri.miograph.databinding.DeviceListItemMenuBinding
 
 class DevicesListAdapter(
     internal var devices: MutableList<DeviceListItem>,
-    private val onConnectClick: (DeviceListItem) -> Unit
+    private val onConnectClick: (DeviceListItem) -> Unit,
+    private val onDisconnectClick: (DeviceListItem) -> Unit,
+    private val onInfoClick: (DeviceListItem) -> Unit,
+    private val isConnectedProvider: () -> Boolean
 ) : RecyclerView.Adapter<DevicesListAdapter.ViewHolder>() {
 
-    // Делаем ViewHolder inner классом чтобы иметь доступ к свойствам адаптера
-    inner class ViewHolder(val binding: DeviceListItemSearchBinding) : RecyclerView.ViewHolder(binding.root) {
-
+    inner class ViewHolder(val binding: DeviceListItemMenuBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
-            // Добавляем обработчик клика на иконку меню
             binding.overflowMenu.setOnClickListener { view ->
                 showPopupMenu(view)
             }
@@ -26,10 +26,17 @@ class DevicesListAdapter(
 
         private fun showPopupMenu(view: View) {
             val popup = PopupMenu(view.context, view)
-            popup.menuInflater.inflate(R.menu.device_menu_connect, popup.menu)
+            val menuRes = if (isConnectedProvider()) {
+                R.menu.device_menu_disconnect_info
+            } else {
+                R.menu.device_menu_connect
+            }
+            popup.menuInflater.inflate(menuRes, popup.menu)
             popup.setOnMenuItemClickListener { item ->
                 when(item.itemId) {
                     R.id.action_connect -> onConnectClick(devices[adapterPosition])
+                    R.id.action_disconnect -> onDisconnectClick(devices[adapterPosition])
+                    R.id.action_info -> onInfoClick(devices[adapterPosition])
                 }
                 true
             }
@@ -44,7 +51,7 @@ class DevicesListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         // Убираем lateinit binding и создаем его непосредственно для каждого ViewHolder
-        val binding = DeviceListItemSearchBinding.inflate(
+        val binding = DeviceListItemMenuBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false

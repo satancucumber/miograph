@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="deviceListItem"
+            type="com.callibri.miograph.screens.menu.DeviceListItem" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="@drawable/item_border"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+    <TextView
+        android:id="@+id/searchDeviceName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@{deviceListItem.name}"
+        android:textColor="?attr/colorOnSurface"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/progressBar"
+        app:layout_constraintBottom_toTopOf="@id/searchDeviceAddress"/>
+
+    <TextView
+        android:id="@+id/searchDeviceAddress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@{deviceListItem.address}"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchDeviceName"
+        app:layout_constraintEnd_toStartOf="@id/progressBar"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:visibility="@{deviceListItem.inProgress ? View.VISIBLE : View.GONE}"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <ImageView
+        android:id="@+id/overflowMenu"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:src="@drawable/ic_more_vert"
+        android:contentDescription="@string/overflow_desc"
+        android:visibility="@{deviceListItem.inProgress ? View.GONE : View.VISIBLE}"
+        android:padding="8dp"
+        app:tint="?attr/colorControlNormal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+    </layout>

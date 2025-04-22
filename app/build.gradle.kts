@@ -55,6 +55,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.appcompat.v161)
     implementation(libs.neurosdk2)
     implementation(libs.emotional.state.artifacts)
     implementation(libs.spectrumlib)

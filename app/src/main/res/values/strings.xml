@@ -23,4 +23,6 @@
     <string name="dev_power_prc">%1$d %%</string>
 
     <string name="connected_sensors">Connected sensors: %d</string>
+
+    <string name="overflow_desc">More</string>
 </resources>
