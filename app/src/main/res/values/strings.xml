@@ -25,4 +25,8 @@
     <string name="connected_sensors">Connected sensors: %d</string>
 
     <string name="overflow_desc">More</string>
+    <string name="export">Export CSV</string>
+    <string name="no_data_to_export">No data to export</string>
+    <string name="report_saved_to">Report saved to: %s</string>
+    <string name="export_failed">Export failed: %s</string>
 </resources>

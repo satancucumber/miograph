@@ -24,6 +24,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <Button
+            android:id="@+id/exportButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:layout_weight="1"
+            android:enabled="@{viewModel.isSessionCompleted}"
+            android:text="@string/export"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <com.androidplot.xy.XYPlot
             android:id="@+id/plot_signal"
             android:layout_width="0dp"
@@ -31,19 +44,16 @@
             app:graphAnchor="left_top"
             app:graphHeight="0dp"
             app:graphHeightMode="fill"
-
             app:graphHorizontalPosition="0dp"
             app:graphHorizontalPositioning="absolute_from_left"
             app:graphVerticalPosition="0dp"
             app:graphVerticalPositioning="relative_from_top"
             app:graphWidth="0dp"
-
             app:graphWidthMode="fill"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/envelopeButton" />
+            app:layout_constraintTop_toBottomOf="@+id/exportButton" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </layout>
