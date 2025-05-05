@@ -1,5 +1,6 @@
 package com.callibri.miograph.screens.envelope
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
@@ -17,8 +18,13 @@ import com.callibri.miograph.databinding.FragmentEnvelopeBinding
 import com.callibri.miograph.utils.PlotHolder
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class EnvelopeFragment : Fragment() {
+
+    private var sampleFrequency: Float = 40.0f
 
     companion object {
         fun newInstance() = EnvelopeFragment()
@@ -47,7 +53,7 @@ class EnvelopeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.envelopeButton.setOnClickListener { viewModel.onStartClicked() }
+        binding.envelopeButton.setOnClickListener { viewModel.onStartClicked(sampleFrequency) }
         binding.exportButton.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 createFile()
@@ -57,7 +63,7 @@ class EnvelopeFragment : Fragment() {
         }
 
         plot = PlotHolder(binding.plotSignal)
-        plot?.startRender(40.0f, PlotHolder.ZoomVal.V_AUTO_M_S2, 5.0f)
+        plot?.startRender(sampleFrequency, PlotHolder.ZoomVal.V_AUTO_M_S2, 5.0f)
 
         val samplesObserver = Observer<List<Double>> { newSamples ->
             plot?.addData(newSamples)
@@ -93,15 +99,21 @@ class EnvelopeFragment : Fragment() {
             data?.data?.let { uri ->
                 context?.contentResolver?.openOutputStream(uri)?.use { os ->
                     BufferedWriter(OutputStreamWriter(os)).use { writer ->
-                        writer.write("Sensor Name,Address,Time (ms),Value\n")
+                        writer.write("Sensor Name,Address,Time,Value\n")
                         viewModel.recordedData.forEach { data ->
-                            writer.write("${data.sensorName},${data.sensorAddress},${data.timestamp},${data.value}\n")
+                            writer.write("${data.sensorName},${data.sensorAddress},${formatTimestamp(data.timestamp)},${data.value}\n")
                         }
                     }
                     Toast.makeText(context, R.string.report_saved_to, Toast.LENGTH_LONG).show()
                 }
             }
         }
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun formatTimestamp(timestamp: Long): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+        return sdf.format(Date(timestamp))
     }
 
 }

@@ -1,5 +1,6 @@
 package com.callibri.miograph.screens.envelope
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.media.MediaScannerConnection
 import android.os.Environment
@@ -13,6 +14,12 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.ceil
+import kotlin.math.round
 
 class EnvelopeViewModel : ViewModel() {
     var started = ObservableBoolean(false)
@@ -27,24 +34,23 @@ class EnvelopeViewModel : ViewModel() {
     private var startTime: Long = 0
     private var sampleIndex: Int = 0
 
-    fun onStartClicked() {
+    fun onStartClicked(sampleFrequency: Float) {
         if (started.get()) {
             CallibriController.stopEnvelope()
             isSessionCompleted.set(true)
         } else {
             recordedData.clear()
-            sampleIndex = 0
+            sampleIndex = 0 // Сброс счётчика
             startTime = System.currentTimeMillis()
             val sensorName = CallibriController.currentSensorInfo?.name ?: "Unknown"
             val sensorAddress = CallibriController.currentSensorInfo?.address ?: "Unknown"
             CallibriController.startEnvelope { envelopeDataArray ->
                 val samplesList = envelopeDataArray.map { it.sample }
                 samples.postValue(samplesList)
-
                 envelopeDataArray.forEach { envelopeData ->
-                    val timestamp = startTime + sampleIndex // 1 ms per sample at 1000Hz
+                    val timestamp = startTime + sampleIndex // 1 мс на семпл
                     recordedData.add(SensorData(sensorName, sensorAddress, timestamp, envelopeData.sample))
-                    sampleIndex++
+                    sampleIndex += ceil(1000 / sampleFrequency).toInt()
                 }
             }
             isSessionCompleted.set(false)
@@ -62,18 +68,15 @@ class EnvelopeViewModel : ViewModel() {
             val fileName = "miograph_report_${System.currentTimeMillis()}.csv"
             val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
-            // Создаем файл в папке Downloads
             val file = File(downloadsDir, fileName)
 
-            // Записываем данные
             FileWriter(file).use { writer ->
-                writer.write("Sensor Name,Address,Time (ms),Value\n")
+                writer.write("Sensor Name,Address,Time,Value\n")
                 recordedData.forEach { data ->
-                    writer.write("${data.sensorName},${data.sensorAddress},${data.timestamp},${data.value}\n")
+                    writer.write("${data.sensorName},${data.sensorAddress},${formatTimestamp(data.timestamp)},${data.value}\n")
                 }
             }
 
-            // Обновляем медиа-сканер чтобы файл сразу был виден
             MediaScannerConnection.scanFile(
                 context,
                 arrayOf(file.absolutePath),
@@ -85,6 +88,12 @@ class EnvelopeViewModel : ViewModel() {
         } catch (e: Exception) {
             exportStatus.postValue(context.getString(R.string.export_failed, e.localizedMessage))
         }
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun formatTimestamp(timestamp: Long): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+        return sdf.format(Date(timestamp))
     }
 
     fun close(){
