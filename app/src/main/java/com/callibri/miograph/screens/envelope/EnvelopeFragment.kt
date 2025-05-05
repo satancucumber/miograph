@@ -24,8 +24,6 @@ import java.util.Locale
 
 class EnvelopeFragment : Fragment() {
 
-    private var sampleFrequency: Float = 40.0f
-
     companion object {
         fun newInstance() = EnvelopeFragment()
     }
@@ -53,7 +51,12 @@ class EnvelopeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.envelopeButton.setOnClickListener { viewModel.onStartClicked(sampleFrequency) }
+        val sampleFrequency = CallibriController.getSamplingFrequency()
+        plot?.startRender(sampleFrequency, PlotHolder.ZoomVal.V_AUTO_M_S2, 5.0f)
+
+        binding.envelopeButton.setOnClickListener {
+            viewModel.onStartClicked(sampleFrequency)
+        }
         binding.exportButton.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 createFile()
@@ -63,7 +66,7 @@ class EnvelopeFragment : Fragment() {
         }
 
         plot = PlotHolder(binding.plotSignal)
-        plot?.startRender(sampleFrequency, PlotHolder.ZoomVal.V_AUTO_M_S2, 5.0f)
+        plot?.startRender(40.0f, PlotHolder.ZoomVal.V_AUTO_M_S2, 5.0f)
 
         val samplesObserver = Observer<List<Double>> { newSamples ->
             plot?.addData(newSamples)

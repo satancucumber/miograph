@@ -40,17 +40,16 @@ class EnvelopeViewModel : ViewModel() {
             isSessionCompleted.set(true)
         } else {
             recordedData.clear()
-            sampleIndex = 0 // Сброс счётчика
-            startTime = System.currentTimeMillis()
             val sensorName = CallibriController.currentSensorInfo?.name ?: "Unknown"
             val sensorAddress = CallibriController.currentSensorInfo?.address ?: "Unknown"
             CallibriController.startEnvelope { envelopeDataArray ->
                 val samplesList = envelopeDataArray.map { it.sample }
                 samples.postValue(samplesList)
-                envelopeDataArray.forEach { envelopeData ->
-                    val timestamp = startTime + sampleIndex // 1 мс на семпл
+                val currentTime = System.currentTimeMillis()
+                val interval = (1000.0 / sampleFrequency).toLong()
+                envelopeDataArray.forEachIndexed { index, envelopeData ->
+                    val timestamp = currentTime - (envelopeDataArray.size - index - 1) * interval
                     recordedData.add(SensorData(sensorName, sensorAddress, timestamp, envelopeData.sample))
-                    sampleIndex += ceil(1000 / sampleFrequency).toInt()
                 }
             }
             isSessionCompleted.set(false)

@@ -217,6 +217,10 @@ object CallibriController {
                 ex.printStackTrace()
             }
         }
+
+    fun getSamplingFrequency(): Float {
+        return sensor?.samplingFrequency?.toFloat() ?: 0f
+    }
 }
 
 fun SensorSamplingFrequency.toFloat(): Float {
