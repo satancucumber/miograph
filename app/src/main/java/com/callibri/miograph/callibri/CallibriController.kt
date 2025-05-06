@@ -1,5 +1,6 @@
 package com.callibri.miograph.callibri
 
+import com.callibri.miograph.data.SensorInfoModel
 import com.neurosdk2.neuro.Callibri
 import com.neurosdk2.neuro.Scanner
 import com.neurosdk2.neuro.Sensor
@@ -114,85 +115,90 @@ object CallibriController {
             return sensor != null
         }
 
-    fun fullInfo(): String {
-        val info = buildString {
-            append("Parameters: ")
+    fun fullInfo(): SensorInfoModel {
+        val parameters = mutableListOf<SensorInfoModel.Parameter>().apply {
             for (param in sensor!!.supportedParameter) {
-                append("\n\tName: ${param.param.name}")
-                append("\n\t\tAccess: ${param.paramAccess}")
-                when (param.param!!) {
-                    SensorParameter.ParameterGain -> append("\n\t\tValue: ${sensor?.gain}")
-                    SensorParameter.ParameterHardwareFilterState -> {
-
-                    }
-                    SensorParameter.ParameterFirmwareMode -> append("\n\t\tValue: ${sensor?.firmwareMode}")
-                    SensorParameter.ParameterSamplingFrequency -> append("\n\t\tValue: ${sensor?.samplingFrequency}")
-                    SensorParameter.ParameterOffset -> append("\n\t\tValue: ${sensor?.dataOffset}")
-                    SensorParameter.ParameterExternalSwitchState -> append("\n\t\tValue: ${sensor?.extSwInput}")
-                    SensorParameter.ParameterADCInputState -> append("\n\t\tValue: ${sensor?.adcInput}")
-                    SensorParameter.ParameterAccelerometerSens -> append("\n\t\tValue: ${sensor?.accSens}")
-                    SensorParameter.ParameterGyroscopeSens -> append("\n\t\tValue: ${sensor?.gyroSens}")
-                    SensorParameter.ParameterStimulatorAndMAState -> {
-                        append("\n\t\tStimulator state: ${sensor?.stimulatorMAState?.stimulatorState}")
-                        append("\n\t\tMA state: ${sensor?.stimulatorMAState?.maState}")
-                    }
-                    SensorParameter.ParameterStimulatorParamPack -> {
-                        append("\n\t\tCurrent: ${sensor?.stimulatorParam?.current}")
-                        append("\n\t\tFrequency: ${sensor?.stimulatorParam?.frequency}")
-                        append("\n\t\tPulse width: ${sensor?.stimulatorParam?.pulseWidth}")
-                        append("\n\t\tStimulus duration: ${sensor?.stimulatorParam?.stimulusDuration}")
-                    }
-                    SensorParameter.ParameterMotionAssistantParamPack -> {
-                        append("\n\t\tGyro start: ${sensor?.motionAssistantParam?.gyroStart}")
-                        append("\n\t\tGyro stop: ${sensor?.motionAssistantParam?.gyroStop}")
-                        append("\n\t\tLimb: ${sensor?.motionAssistantParam?.limb}")
-                        append("\n\t\tMin pause (in ms): ${sensor?.motionAssistantParam?.minPauseMs}")
-                    }
-                    SensorParameter.ParameterFirmwareVersion -> {
-                        append("\n\t\tFW version: ${sensor?.version?.fwMajor}.${sensor?.version?.fwMinor}.${sensor?.version?.fwPatch}")
-                        append("\n\t\tHW version: ${sensor?.version?.hwMajor}.${sensor?.version?.hwMinor}.${sensor?.version?.hwPatch}")
-                        append("\n\t\tExtension: ${sensor?.version?.extMajor}")
-                    }
-                    SensorParameter.ParameterMEMSCalibrationStatus -> append("\n  Value: ${sensor?.memsCalibrateState}")
-                    SensorParameter.ParameterMotionCounterParamPack -> {
-                        append("\n\t\tInsense threshold MG: ${sensor?.motionCounterParam?.insenseThresholdMG}")
-                        append("\n\t\tInsense threshold sample: ${sensor?.motionCounterParam?.insenseThresholdSample}")
-                    }
-                    SensorParameter.ParameterMotionCounter -> {
-                        append("\n\t\tInsense threshold MG: ${sensor?.motionCounter}")
-                        append("\n\t\tInsense threshold sample: ${sensor?.motionCounterParam?.insenseThresholdSample}")
-                    }
-                    SensorParameter.ParameterBattPower -> append("\n\t\tValue: ${sensor?.battPower}")
-                    SensorParameter.ParameterSensorFamily -> append("\n\t\tValue: ${sensor?.sensFamily}")
-                    SensorParameter.ParameterSensorMode -> append("\n\t\tValue: ${sensor?.firmwareMode}")
-                    SensorParameter.ParameterSensorChannels -> append("\n\t\tValue: ${sensor?.channelsCount}")
-                    SensorParameter.ParameterSamplingFrequencyResp -> append("\n\t\tValue: ${sensor?.samplingFrequencyResp}")
-                    SensorParameter.ParameterName -> append("\n\t\tValue: ${sensor?.name}")
-                    SensorParameter.ParameterState -> append("\n\t\tValue: ${sensor?.state}")
-                    SensorParameter.ParameterAddress -> append("\n\t\tValue: ${sensor?.address}")
-                    SensorParameter.ParameterSerialNumber -> append("\n\t\tValue: ${sensor?.serialNumber}")
-                    else -> break;
+                val paramName = param.param.name
+                val paramAccess = param.paramAccess?.toString() ?: ""
+                val paramValue = when (param.param!!) {
+                    SensorParameter.ParameterGain -> sensor?.gain?.toString()
+                    SensorParameter.ParameterHardwareFilterState ->
+                        sensor?.hardwareFilters?.joinToString { it.toString() }
+                    SensorParameter.ParameterFirmwareMode -> sensor?.firmwareMode?.toString()
+                    SensorParameter.ParameterSamplingFrequency -> sensor?.samplingFrequency?.toString()
+                    SensorParameter.ParameterOffset -> sensor?.dataOffset?.toString()
+                    SensorParameter.ParameterExternalSwitchState -> sensor?.extSwInput?.toString()
+                    SensorParameter.ParameterADCInputState -> sensor?.adcInput?.toString()
+                    SensorParameter.ParameterAccelerometerSens -> sensor?.accSens?.toString()
+                    SensorParameter.ParameterGyroscopeSens -> sensor?.gyroSens?.toString()
+                    SensorParameter.ParameterStimulatorAndMAState ->
+                        """Stimulator state: ${sensor?.stimulatorMAState?.stimulatorState}
+                    MA state: ${sensor?.stimulatorMAState?.maState}
+                    """.trimIndent()
+                    SensorParameter.ParameterStimulatorParamPack ->
+                        """Current: ${sensor?.stimulatorParam?.current}
+                    Frequency: ${sensor?.stimulatorParam?.frequency}
+                    Pulse width: ${sensor?.stimulatorParam?.pulseWidth}
+                    Stimulus duration: ${sensor?.stimulatorParam?.stimulusDuration}
+                    """.trimIndent()
+                    SensorParameter.ParameterMotionAssistantParamPack ->
+                        """Gyro start: ${sensor?.motionAssistantParam?.gyroStart}
+                    Gyro stop: ${sensor?.motionAssistantParam?.gyroStop}
+                    Limb: ${sensor?.motionAssistantParam?.limb}
+                    Min pause (in ms): ${sensor?.motionAssistantParam?.minPauseMs}
+                    """.trimIndent()
+                    SensorParameter.ParameterFirmwareVersion ->
+                        """FW version: ${sensor?.version?.fwMajor}.${sensor?.version?.fwMinor}.${sensor?.version?.fwPatch}
+                    HW version: ${sensor?.version?.hwMajor}.${sensor?.version?.hwMinor}.${sensor?.version?.hwPatch}
+                    Extension: ${sensor?.version?.extMajor}
+                    """.trimIndent()
+                    SensorParameter.ParameterMEMSCalibrationStatus -> sensor?.memsCalibrateState?.toString()
+                    SensorParameter.ParameterMotionCounterParamPack ->
+                        """Insense threshold MG: ${sensor?.motionCounterParam?.insenseThresholdMG}
+                    Insense threshold sample: ${sensor?.motionCounterParam?.insenseThresholdSample}
+                    """.trimIndent()
+                    SensorParameter.ParameterMotionCounter ->
+                        """Insense threshold MG: ${sensor?.motionCounter}
+                    Insense threshold sample: ${sensor?.motionCounterParam?.insenseThresholdSample}
+                    """.trimIndent()
+                    SensorParameter.ParameterBattPower -> sensor?.battPower?.toString()
+                    SensorParameter.ParameterSensorFamily -> sensor?.sensFamily?.toString()
+                    SensorParameter.ParameterSensorMode -> sensor?.firmwareMode?.toString()
+                    SensorParameter.ParameterSensorChannels -> sensor?.channelsCount?.toString()
+                    SensorParameter.ParameterSamplingFrequencyResp -> sensor?.samplingFrequencyResp?.toString()
+                    SensorParameter.ParameterName -> sensor?.name?.toString()
+                    SensorParameter.ParameterState -> sensor?.state?.toString()
+                    SensorParameter.ParameterAddress -> sensor?.address?.toString()
+                    SensorParameter.ParameterSerialNumber -> sensor?.serialNumber?.toString()
+                    else -> continue // Пропускаем неизвестные параметры вместо прерывания
                 }
-            }
-
-            append("\tColor: ${sensor?.color}")
-
-            if (sensor?.isSupportedFeature(SensorFeature.Signal) == true) {
-                append("\nSignal type: \n\t${sensor?.signalType}")
-            }
-
-            append("\n\nCommands: ")
-            for (command in sensor?.supportedCommand!!) {
-                append("\n\t${command.name}")
-            }
-
-            append("\n\nFeatures: ")
-            for (feature in sensor?.supportedFeature!!) {
-                append("\n\t${feature.name}")
+                add(SensorInfoModel.Parameter(
+                    paramName,
+                    paramAccess,
+                    paramValue ?: "N/A" // Значение по умолчанию если null
+                ))
             }
         }
 
-        return info
+        val color = sensor?.color?.toString() ?: "N/A"
+        val signal = sensor?.isSupportedFeature(SensorFeature.Signal) == true
+        val signalType = if (signal) {
+            sensor?.signalType?.toString() ?: "N/A"
+        } else {
+            "Not supported"
+        }
+
+        val commands = sensor?.supportedCommand?.map { it.name } ?: emptyList()
+        val features = sensor?.supportedFeature?.map { it.name } ?: emptyList()
+
+        return SensorInfoModel(
+            parameters = parameters,
+            commands = commands,
+            features = features,
+            color = color,
+            signalType = signalType,
+            signal = signal
+        )
     }
 
     fun startEnvelope(envelopeReceived: (Array<CallibriEnvelopeData>) -> Unit) {

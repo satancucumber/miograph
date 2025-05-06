@@ -4,33 +4,113 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="android.view.View" />
         <variable
             name="viewModel"
             type="com.callibri.miograph.screens.info.InfoViewModel" />
     </data>
 
-    <FrameLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".screens.info.InfoFragment">
+        android:fillViewport="true">
 
-        <ScrollView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/colorTitle"
+                android:text="Sensor color"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" >
+                android:visibility="@{viewModel.sensorInfo.color == null ? View.GONE : View.VISIBLE}"/>
 
-                <TextView
-                    android:id="@+id/sensor_info"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="@{viewModel.infoText}" />
-            </LinearLayout>
-        </ScrollView>
+            <TextView
+                android:id="@+id/color"
+                android:text="@{viewModel.sensorInfo.color}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorOnSurface"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:visibility="@{viewModel.sensorInfo.color == null ? View.GONE : View.VISIBLE}"/>
 
-    </FrameLayout>
+            <TextView
+                android:id="@+id/signalTypeTitle"
+                android:text="Signal type"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="@{viewModel.sensorInfo.signal ? View.VISIBLE : View.GONE}"/>
+
+            <TextView
+                android:id="@+id/signalType"
+                android:text="@{viewModel.sensorInfo.signalType}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorOnSurface"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:visibility="@{viewModel.sensorInfo.signal ? View.VISIBLE : View.GONE}"/>
+
+            <TextView
+                android:id="@+id/signalTitle"
+                android:text="Parameters"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/parametersList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layoutManager="LinearLayoutManager"/>
+
+            <TextView
+                android:id="@+id/commandsTitle"
+                android:text="Commands"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/commandsList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layoutManager="LinearLayoutManager"/>
+
+            <TextView
+                android:id="@+id/featuresTitle"
+                android:text="Features"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/featuresList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layoutManager="LinearLayoutManager"/>
+
+        </LinearLayout>
+    </ScrollView>
 </layout>
 

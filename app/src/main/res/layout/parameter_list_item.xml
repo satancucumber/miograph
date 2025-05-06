@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="parameter"
+            type="com.callibri.miograph.data.SensorInfoModel.Parameter"/>
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/item_border"
+        android:padding="16dp">
+
+        <!-- Название параметра -->
+        <TextView
+            android:id="@+id/paramName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@{parameter.name}"
+            android:textColor="?attr/colorOnSurface"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/paramValue"/>
+
+        <!-- Доступ -->
+        <TextView
+            android:id="@+id/paramAccess"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{parameter.access}"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/paramName"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <!-- Значение -->
+        <TextView
+            android:id="@+id/paramValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@{parameter.value}"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+            android:gravity="end"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/paramName"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
