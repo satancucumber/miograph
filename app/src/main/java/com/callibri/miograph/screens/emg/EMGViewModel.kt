@@ -1,27 +1,23 @@
-package com.callibri.miograph.screens.envelope
+package com.callibri.miograph.screens.emg
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.media.MediaScannerConnection
 import android.os.Environment
 import androidx.databinding.ObservableBoolean
+import androidx.databinding.ObservableField
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.callibri.miograph.R
 import com.callibri.miograph.callibri.CallibriController
 import com.callibri.miograph.data.SensorData
-import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
-import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.ceil
-import kotlin.math.round
 
-class EnvelopeViewModel : ViewModel() {
+class EMGViewModel : ViewModel() {
     var started = ObservableBoolean(false)
     val isSessionCompleted = ObservableBoolean(false)
     val exportStatus = MutableLiveData<String>()
@@ -34,22 +30,27 @@ class EnvelopeViewModel : ViewModel() {
     private var startTime: Long = 0
     private var sampleIndex: Int = 0
 
-    fun onStartClicked(sampleFrequency: Float) {
+    fun onStartClicked() {
         if (started.get()) {
-            CallibriController.stopEnvelope()
+            CallibriController.stopSignal()
             isSessionCompleted.set(true)
         } else {
             recordedData.clear()
             val sensorName = CallibriController.currentSensorInfo?.name ?: "Unknown"
             val sensorAddress = CallibriController.currentSensorInfo?.address ?: "Unknown"
-            CallibriController.startEnvelope { envelopeDataArray ->
-                val samplesList = envelopeDataArray.map { it.sample }
-                samples.postValue(samplesList)
+            val sampleFrequency = CallibriController.getSamplingFrequency()
+
+            CallibriController.startSignal { signalDataArray ->
+                val res = arrayListOf<Double>()
+                for (sample in signalDataArray) {
+                    res.addAll(sample.samples.toList())
+                }
+                samples.postValue(res)
                 val currentTime = System.currentTimeMillis()
                 val interval = (1000.0 / sampleFrequency).toLong()
-                envelopeDataArray.forEachIndexed { index, envelopeData ->
-                    val timestamp = currentTime - (envelopeDataArray.size - index - 1) * interval
-                    recordedData.add(SensorData(sensorName, sensorAddress, timestamp, envelopeData.sample))
+                res.forEachIndexed { index, signalData ->
+                    val timestamp = currentTime - (signalDataArray.size - index - 1) * interval
+                    recordedData.add(SensorData(sensorName, sensorAddress, timestamp, signalData))
                 }
             }
             isSessionCompleted.set(false)
@@ -96,6 +97,6 @@ class EnvelopeViewModel : ViewModel() {
     }
 
     fun close(){
-        CallibriController.stopEnvelope()
+        CallibriController.stopSignal()
     }
 }

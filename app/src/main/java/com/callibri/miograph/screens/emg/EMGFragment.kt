@@ -1,35 +1,39 @@
-package com.callibri.miograph.screens.envelope
+package com.callibri.miograph.screens.emg
 
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.callibri.miograph.R
 import com.callibri.miograph.callibri.CallibriController
-import com.callibri.miograph.databinding.FragmentEnvelopeBinding
+import com.callibri.miograph.callibri.toFloat
 import com.callibri.miograph.utils.PlotHolder
+import com.callibri.miograph.databinding.FragmentEmgBinding
+import com.neurosdk2.neuro.types.SensorSamplingFrequency
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class EnvelopeFragment : Fragment() {
+class EMGFragment : Fragment() {
 
     companion object {
-        fun newInstance() = EnvelopeFragment()
+        fun newInstance() = EMGFragment()
     }
 
-    private var _binding: FragmentEnvelopeBinding? = null
-    private var _viewModel: EnvelopeViewModel? = null
+    private var _binding: FragmentEmgBinding? = null
+    private var _viewModel: EMGViewModel? = null
 
     private val binding get() = _binding!!
     private val viewModel get() = _viewModel!!
@@ -40,8 +44,8 @@ class EnvelopeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentEnvelopeBinding.inflate(inflater, container, false)
-        _viewModel = ViewModelProvider(this)[EnvelopeViewModel::class.java]
+        _binding = FragmentEmgBinding.inflate(inflater, container, false)
+        _viewModel = ViewModelProvider(this)[EMGViewModel::class.java]
 
         binding.viewModel = viewModel
 
@@ -51,11 +55,43 @@ class EnvelopeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val sampleFrequency = CallibriController.getSamplingFrequency()
-        plot?.startRender(sampleFrequency, PlotHolder.ZoomVal.V_AUTO_M_S2, 5.0f)
+        // Настройка Spinner
+        val frequencies = listOf(
+            SensorSamplingFrequency.FrequencyHz125,
+            SensorSamplingFrequency.FrequencyHz250,
+            SensorSamplingFrequency.FrequencyHz500,
+            SensorSamplingFrequency.FrequencyHz1000,
+            SensorSamplingFrequency.FrequencyHz2000
+        )
 
-        binding.envelopeButton.setOnClickListener {
-            viewModel.onStartClicked(sampleFrequency)
+        val spinner = binding.frequencySpinner
+        val adapter = ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.sampling_frequencies,
+            android.R.layout.simple_spinner_item
+        ).also {
+            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+        spinner.adapter = adapter
+
+        // Установка начальной частоты
+        val currentFrequency = CallibriController.getSamplingFrequency()
+        val initialPosition = frequencies.indexOfFirst { it.toFloat() == currentFrequency }
+        spinner.setSelection(initialPosition.coerceAtLeast(0))
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                val selectedFrequency = frequencies[pos]
+                CallibriController.setSamplingFrequency(selectedFrequency)
+                plot?.stopRender()
+                plot?.startRender(selectedFrequency.toFloat(), PlotHolder.ZoomVal.V_AUTO_M_S2, 5.0f)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        binding.emgButton.setOnClickListener {
+            viewModel.onStartClicked()
         }
         binding.exportButton.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -66,7 +102,7 @@ class EnvelopeFragment : Fragment() {
         }
 
         plot = PlotHolder(binding.plotSignal)
-        plot?.startRender(40.0f, PlotHolder.ZoomVal.V_AUTO_M_S2, 5.0f)
+        CallibriController.samplingFrequency?.let { plot?.startRender(it, PlotHolder.ZoomVal.V_AUTO_M_S2, 5.0f) }
 
         val samplesObserver = Observer<List<Double>> { newSamples ->
             plot?.addData(newSamples)
@@ -118,5 +154,4 @@ class EnvelopeFragment : Fragment() {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
         return sdf.format(Date(timestamp))
     }
-
 }

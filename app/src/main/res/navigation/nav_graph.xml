@@ -17,8 +17,8 @@
             android:id="@+id/action_MenuFragment_to_SearchFragment"
             app:destination="@id/SearchFragment" />
         <action
-            android:id="@+id/action_MenuFragment_to_envelopeFragment"
-            app:destination="@id/envelopeFragment" />
+            android:id="@+id/action_MenuFragment_to_emgFragment"
+            app:destination="@id/emgFragment" />
     </fragment>
     <fragment
         android:id="@+id/SearchFragment"
@@ -30,8 +30,8 @@
         android:label="Info"
         tools:layout="@layout/fragment_info" />
     <fragment
-        android:id="@+id/envelopeFragment"
-        android:name="com.callibri.miograph.screens.envelope.EnvelopeFragment"
+        android:id="@+id/emgFragment"
+        android:name="com.callibri.miograph.screens.emg.EMGFragment"
         android:label="Envelope"
-        tools:layout="@layout/fragment_envelope" />
+        tools:layout="@layout/fragment_emg" />
 </navigation>

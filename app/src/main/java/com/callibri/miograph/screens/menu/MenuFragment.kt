@@ -59,7 +59,7 @@ class MenuFragment : Fragment() {
             findNavController().navigate(R.id.action_MenuFragment_to_SearchFragment)
         }
         binding.buttonEnvelope.setOnClickListener {
-            findNavController().navigate(R.id.action_MenuFragment_to_envelopeFragment)
+            findNavController().navigate(R.id.action_MenuFragment_to_emgFragment)
         }
 
         // Наблюдение за списком устройств

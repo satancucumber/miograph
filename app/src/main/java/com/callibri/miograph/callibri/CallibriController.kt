@@ -1,10 +1,13 @@
 package com.callibri.miograph.callibri
 
+import android.content.Context
+import com.callibri.miograph.R
 import com.callibri.miograph.data.SensorInfoModel
 import com.neurosdk2.neuro.Callibri
 import com.neurosdk2.neuro.Scanner
 import com.neurosdk2.neuro.Sensor
 import com.neurosdk2.neuro.interfaces.CallibriEnvelopeDataReceived
+import com.neurosdk2.neuro.interfaces.CallibriSignalDataReceived
 import com.neurosdk2.neuro.types.*
 import kotlinx.coroutines.runBlocking
 import kotlin.concurrent.thread
@@ -115,6 +118,8 @@ object CallibriController {
             return sensor != null
         }
 
+    val samplingFrequency get() = sensor?.samplingFrequency?.toFloat()
+
     fun fullInfo(): SensorInfoModel {
         val parameters = mutableListOf<SensorInfoModel.Parameter>().apply {
             for (param in sensor!!.supportedParameter) {
@@ -212,6 +217,16 @@ object CallibriController {
         executeCommand(SensorCommand.StopEnvelope)
     }
 
+    fun startSignal(signalReceived: (Array<CallibriSignalData>) -> Unit) {
+        sensor?.callibriSignalDataReceived = CallibriSignalDataReceived(signalReceived)
+        executeCommand(SensorCommand.StartSignal)
+    }
+
+    fun stopSignal() {
+        sensor?.callibriSignalDataReceived = null
+        executeCommand(SensorCommand.StopSignal)
+    }
+
     @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
     private fun executeCommand(command: SensorCommand) =
         runBlocking(newSingleThreadContext("dedicatedThread")) {
@@ -227,6 +242,14 @@ object CallibriController {
     fun getSamplingFrequency(): Float {
         return sensor?.samplingFrequency?.toFloat() ?: 0f
     }
+
+    fun setSamplingFrequency(frequency: SensorSamplingFrequency) {
+        try {
+            sensor?.samplingFrequency = frequency
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+    }
 }
 
 fun SensorSamplingFrequency.toFloat(): Float {
@@ -238,5 +261,16 @@ fun SensorSamplingFrequency.toFloat(): Float {
         SensorSamplingFrequency.FrequencyHz2000 -> 2000F
         SensorSamplingFrequency.FrequencyUnsupported -> 0.0f
         else -> 0.0f
+    }
+}
+
+fun SensorSamplingFrequency.toDisplayString(context: Context): String {
+    return when (this) {
+        SensorSamplingFrequency.FrequencyHz125 -> context.getString(R.string.frequency_hz_125)
+        SensorSamplingFrequency.FrequencyHz250 -> context.getString(R.string.frequency_hz_250)
+        SensorSamplingFrequency.FrequencyHz500 -> context.getString(R.string.frequency_hz_500)
+        SensorSamplingFrequency.FrequencyHz1000 -> context.getString(R.string.frequency_hz_1000)
+        SensorSamplingFrequency.FrequencyHz2000 -> context.getString(R.string.frequency_hz_2000)
+        else -> context.getString(R.string.unknown_frequency)
     }
 }

@@ -29,4 +29,19 @@
     <string name="no_data_to_export">No data to export</string>
     <string name="report_saved_to">Report saved to: %s</string>
     <string name="export_failed">Export failed: %s</string>
+    <string name="frequency_hz_125">125 Hz</string>
+    <string name="frequency_hz_250">250 Hz</string>
+    <string name="frequency_hz_500">500 Hz</string>
+    <string name="frequency_hz_1000">1000 Hz</string>
+    <string name="frequency_hz_2000">2000 Hz</string>
+
+    <string-array name="sampling_frequencies">
+        <item>@string/frequency_hz_125</item>
+        <item>@string/frequency_hz_250</item>
+        <item>@string/frequency_hz_500</item>
+        <item>@string/frequency_hz_1000</item>
+        <item>@string/frequency_hz_2000</item>
+    </string-array>
+
+    <string name="unknown_frequency">- Hz</string>
 </resources>
