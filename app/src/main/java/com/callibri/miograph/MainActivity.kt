@@ -53,9 +53,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        CallibriController.batteryChanged = {
+        CallibriController.onBatteryChanged = { level ->
             runOnUiThread {
-                binding.txtDevBatteryPower.text = getString(R.string.dev_power_prc, it)
+                binding.txtDevBatteryPower.text = getString(R.string.dev_power_prc, level)
             }
 
         }

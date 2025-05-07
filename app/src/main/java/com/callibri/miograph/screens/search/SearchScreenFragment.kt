@@ -32,7 +32,7 @@ class SearchScreenFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSearchScreenBinding.inflate(inflater, container, false)
-        _viewModel = ViewModelProvider(this).get(SearchScreenViewModel::class.java)
+        _viewModel = ViewModelProvider(this)[SearchScreenViewModel::class.java]
         return binding.root
     }
 
@@ -88,7 +88,7 @@ class SearchScreenFragment : Fragment() {
         device.inProgress = true
         devicesListAdapter.notifyItemChanged(devicesListAdapter.devices.indexOf(device))
 
-        CallibriController.createAndConnect(device.sInfo) { state ->
+        CallibriController.createAndConnect(requireContext(), device.sInfo) { state ->
             activity?.runOnUiThread {
                 device.inProgress = false
                 devicesListAdapter.notifyItemChanged(devicesListAdapter.devices.indexOf(device))
@@ -100,7 +100,7 @@ class SearchScreenFragment : Fragment() {
                     else -> {
                         Toast.makeText(
                             requireContext(),
-                            "Device connection failed!",
+                            getString(R.string.connection_failed_message),
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -112,6 +112,7 @@ class SearchScreenFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        viewModel.close()
+        // при выходе со SearchScreen очищаем сканер, чтобы после возвращения список не “зависал”
+        CallibriController.stopSearch()
     }
 }

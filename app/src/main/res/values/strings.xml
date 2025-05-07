@@ -44,4 +44,5 @@
     </string-array>
 
     <string name="unknown_frequency">- Hz</string>
+    <string name="connection_failed_message">Connection failed</string>
 </resources>

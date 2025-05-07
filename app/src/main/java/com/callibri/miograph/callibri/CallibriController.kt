@@ -1,6 +1,8 @@
 package com.callibri.miograph.callibri
 
+import android.app.Activity
 import android.content.Context
+import android.widget.Toast
 import com.callibri.miograph.R
 import com.callibri.miograph.data.SensorInfoModel
 import com.neurosdk2.neuro.Callibri
@@ -12,10 +14,24 @@ import com.neurosdk2.neuro.types.*
 import kotlinx.coroutines.runBlocking
 import kotlin.concurrent.thread
 import kotlinx.coroutines.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
+
 
 object CallibriController {
 
-    var scanner: Scanner? = null
+    private const val CONNECT_TIMEOUT_MS = 10_000L
+
+    private var scanner: Scanner? = null
+    private var sensor: Callibri? = null
+
+    /** Лямбда для внешней обработки смены состояния подключения */
+    var connectionStateChanged: (SensorState) -> Unit = { }
+
+    /** Лямбда для внешней обработки заряда (0..100) */
+    var onBatteryChanged: (Int) -> Unit = { }
+
+    var currentSensorInfo: SensorInfo? = null
 
     fun startSearch(sensorsChanged: (Scanner, List<SensorInfo>) -> Unit) {
         try {
@@ -31,93 +47,131 @@ object CallibriController {
         }
     }
 
-    fun stopSearch() {
-        try {
-            scanner?.stop()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
-    }
+    fun stopSearch() = runCatching { scanner?.stop() }
 
-    private var sensor: Callibri? = null
-
-    var connectionStateChanged: (SensorState) -> Unit = { }
-    var batteryChanged: (Int) -> Unit = { }
-    var currentSensorInfo: SensorInfo? = null
-
-    fun createAndConnect(sensorInfo: SensorInfo, onConnectionResult: (SensorState) -> Unit) {
+    /**
+     * Создаёт экземпляр Callibri и пытается подключиться.
+     *
+     * @param context — нужен для показа Toast
+     * @param sensorInfo — информация из сканера
+     * @param onConnectionResult — колбэк с результатом попытки подключения
+     */
+    fun createAndConnect(
+        context: Context,
+        sensorInfo: SensorInfo,
+        onConnectionResult: (SensorState) -> Unit
+    ) {
         thread {
             try {
-                sensor = scanner?.createSensor(sensorInfo) as Callibri
+                // 1) создаём сенсор
+                sensor = scanner?.createSensor(sensorInfo) as? Callibri
                 currentSensorInfo = sensorInfo
 
-                if (sensor != null) {
-                    sensor?.sensorStateChanged = Sensor.SensorStateChanged(connectionStateChanged)
-                    sensor?.batteryChanged = Sensor.BatteryChanged(batteryChanged)
-
-                    try {
-                        sensor?.samplingFrequency = SensorSamplingFrequency.FrequencyHz1000
-                        sensor?.signalType = CallibriSignalType.EMG
-                        sensor?.hardwareFilters = listOf(SensorFilter.FilterBSFBwhLvl2CutoffFreq45_55Hz,
-                            SensorFilter.FilterHPFBwhLvl1CutoffFreq1Hz);
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
+                if (sensor == null) {
+                    // нет устройства в зоне
+                    (context as? Activity)?.runOnUiThread {
+                        onConnectionResult(SensorState.StateOutOfRange)
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.connection_failed_message),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
+                    return@thread
+                }
 
-                    connectionStateChanged(SensorState.StateInRange)
-                    onConnectionResult(SensorState.StateInRange)
-                } else {
-                    onConnectionResult(SensorState.StateOutOfRange)
+                // 2) подписываемся на колбэки
+                sensor!!.sensorStateChanged = Sensor.SensorStateChanged { st ->
+                    connectionStateChanged(st)
+                }
+                sensor!!.batteryChanged = Sensor.BatteryChanged { level ->
+                    onBatteryChanged(level)
+                }
+
+                // 3) настраиваем параметры
+                runCatching {
+                    sensor!!.samplingFrequency = SensorSamplingFrequency.FrequencyHz1000
+                    sensor!!.signalType = CallibriSignalType.EMG
+                    sensor!!.hardwareFilters = listOf(
+                        SensorFilter.FilterBSFBwhLvl2CutoffFreq45_55Hz,
+                        SensorFilter.FilterHPFBwhLvl1CutoffFreq1Hz
+                    )
+                }
+
+                // 4) запускаем connect()
+                sensor!!.connect()
+
+                // 5) ждём результата в цикле до таймаута
+                val start = System.currentTimeMillis()
+                var result: SensorState
+                do {
+                    result = sensor!!.state
+                    if (result == SensorState.StateInRange) break
+                    Thread.sleep(200)
+                } while (System.currentTimeMillis() - start < CONNECT_TIMEOUT_MS)
+
+                // 6) если не StateInRange по прошествии таймаута — считаем ошибкой
+                if (result != SensorState.StateInRange) {
+                    result = SensorState.StateOutOfRange
+                }
+
+                // 7) возвращаем результат на UI
+                (context as? Activity)?.runOnUiThread {
+                    onConnectionResult(result)
+                    if (result != SensorState.StateInRange) {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.connection_failed_message),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()
+                (context as? Activity)?.runOnUiThread {
+                    onConnectionResult(SensorState.StateOutOfRange)
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.connection_failed_message),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
-
         }
     }
 
     fun connectCurrent(onConnectionResult: (SensorState) -> Unit) {
-        if (sensor?.state == SensorState.StateOutOfRange) {
+        sensor?.let { s ->
             thread {
                 try {
-                    sensor?.connect()
-                    sensor?.sensorStateChanged = Sensor.SensorStateChanged(connectionStateChanged)
-                    sensor?.batteryChanged = Sensor.BatteryChanged(batteryChanged)
-                    onConnectionResult(sensor!!.state)
+                    s.connect()
+                    onConnectionResult(s.state)
                 } catch (ex: Exception) {
                     ex.printStackTrace()
+                    onConnectionResult(SensorState.StateOutOfRange)
                 }
             }
         }
     }
 
-    fun disconnectCurrent() {
-        try {
-            if (sensor?.state == SensorState.StateInRange)
-                sensor?.disconnect()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
-
+    fun disconnectCurrent() = runCatching {
+        sensor?.disconnect()
+        // сбрасываем слушатели, чтобы не было “двойного” вызова
+        connectionStateChanged = { }
+        onBatteryChanged = { }
     }
 
-    fun closeSensor() {
-        try {
-            sensor?.close()
-            sensor = null
-            currentSensorInfo = null
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
+    fun closeSensor() = runCatching {
+        sensor?.close()
+        sensor = null
+        currentSensorInfo = null
+        // тоже сброс на всякий случай
+        connectionStateChanged = { }
+        onBatteryChanged = { }
     }
 
     val connectionState get() = sensor?.state
-
-    val hasDevice: Boolean
-        get() {
-            return sensor != null
-        }
-
+    val hasDevice: Boolean get() = sensor != null
     val samplingFrequency get() = sensor?.samplingFrequency?.toFloat()
 
     fun fullInfo(): SensorInfoModel {
