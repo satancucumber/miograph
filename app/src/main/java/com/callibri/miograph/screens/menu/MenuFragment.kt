@@ -43,6 +43,10 @@ class MenuFragment : Fragment() {
             onConnectClick = { reconnect() },
             onDisconnectClick = { reconnect() },
             onInfoClick = { showDeviceInfo() },
+            onForgetClick = {
+                CallibriController.closeSensor()
+                viewModel.updateConnectedDevices()
+            },
             isConnectedProvider = { viewModel.connected.get() }
         )
 

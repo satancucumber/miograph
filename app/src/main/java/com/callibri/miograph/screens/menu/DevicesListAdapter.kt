@@ -14,6 +14,7 @@ class DevicesListAdapter(
     private val onConnectClick: (DeviceListItem) -> Unit,
     private val onDisconnectClick: (DeviceListItem) -> Unit,
     private val onInfoClick: (DeviceListItem) -> Unit,
+    private val onForgetClick: (DeviceListItem) -> Unit,
     private val isConnectedProvider: () -> Boolean
 ) : RecyclerView.Adapter<DevicesListAdapter.ViewHolder>() {
 
@@ -29,7 +30,7 @@ class DevicesListAdapter(
             val menuRes = if (isConnectedProvider()) {
                 R.menu.device_menu_disconnect_info
             } else {
-                R.menu.device_menu_connect
+                R.menu.device_menu_connect_forget
             }
             popup.menuInflater.inflate(menuRes, popup.menu)
             popup.setOnMenuItemClickListener { item ->
@@ -37,6 +38,7 @@ class DevicesListAdapter(
                     R.id.action_connect -> onConnectClick(devices[adapterPosition])
                     R.id.action_disconnect -> onDisconnectClick(devices[adapterPosition])
                     R.id.action_info -> onInfoClick(devices[adapterPosition])
+                    R.id.action_forget -> onForgetClick(devices[adapterPosition])
                 }
                 true
             }
