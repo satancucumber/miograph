@@ -2,9 +2,7 @@ package com.callibri.miograph
 
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -15,8 +13,6 @@ import com.google.android.material.elevation.SurfaceColors
 import com.neurosdk2.neuro.types.SensorState
 import com.callibri.miograph.callibri.CallibriController
 import com.callibri.miograph.databinding.ActivityMainBinding
-import com.callibri.miograph.screens.menu.MenuFragment
-import com.callibri.miograph.screens.menu.MenuViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -56,16 +52,7 @@ class MainActivity : AppCompatActivity() {
 
                 if (state == SensorState.StateOutOfRange) {
                     binding.txtDevBatteryPower.text = getString(R.string.dev_power_prc, 0)
-                    val currentDest = navController.currentDestination?.id
-                    if (currentDest == R.id.MenuFragment || currentDest == R.id.emgFragment || currentDest == R.id.infoFragment) {
-                        navController.popBackStack(R.id.MenuFragment, true)
-                        navController.navigate(R.id.MenuFragment)
-                        Toast.makeText(
-                            this@MainActivity,
-                            getString(R.string.connection_lost_message),
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
+                    navController.popBackStack(R.id.MenuFragment, false)
                 }
             }
         }

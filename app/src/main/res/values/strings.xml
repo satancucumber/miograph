@@ -46,5 +46,4 @@
     <string name="unknown_frequency">- Hz</string>
     <string name="connection_failed_message">Connection failed</string>
     <string name="forget">Forget</string>
-    <string name="connection_lost_message">Connection with the sensor lost</string>
 </resources>

@@ -19,21 +19,19 @@ class DevicesListAdapter(
 ) : RecyclerView.Adapter<DevicesListAdapter.ViewHolder>() {
 
     inner class ViewHolder(val binding: DeviceListItemMenuBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(device: DeviceListItem) {
-            binding.deviceListItem = device
+        init {
             binding.overflowMenu.setOnClickListener { view ->
-                showPopupMenu(view, device.isConnected)
+                showPopupMenu(view)
             }
-            binding.executePendingBindings()
         }
 
-        private fun showPopupMenu(view: View, isConnected: Boolean) {
-            val menuRes = if (isConnected) {
+        private fun showPopupMenu(view: View) {
+            val popup = PopupMenu(view.context, view)
+            val menuRes = if (isConnectedProvider()) {
                 R.menu.device_menu_disconnect_info
             } else {
                 R.menu.device_menu_connect_forget
             }
-            val popup = PopupMenu(view.context, view)
             popup.menuInflater.inflate(menuRes, popup.menu)
             popup.setOnMenuItemClickListener { item ->
                 when(item.itemId) {
@@ -46,9 +44,15 @@ class DevicesListAdapter(
             }
             popup.show()
         }
+
+        fun bind(device: DeviceListItem) {
+            binding.deviceListItem = device
+            binding.executePendingBindings()
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        // Убираем lateinit binding и создаем его непосредственно для каждого ViewHolder
         val binding = DeviceListItemMenuBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
@@ -63,6 +67,7 @@ class DevicesListAdapter(
 
     override fun getItemCount() = devices.size
 
+    // Метод для обновления списка устройств
     @SuppressLint("NotifyDataSetChanged")
     fun updateDevices(newDevices: List<DeviceListItem>) {
         devices.clear()

@@ -12,16 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MenuViewModel : ViewModel() {
-    internal val _connected = MutableLiveData(CallibriController.connectionState == SensorState.StateInRange)
-    val connected: LiveData<Boolean> = _connected
-
-    init {
-        CallibriController.connectionStateChanged = { state ->
-            _connected.postValue(state == SensorState.StateInRange)
-            updateConnectedDevices()
-        }
-    }
-
+    var connected = ObservableBoolean(false)
     var hasDevice = ObservableBoolean(CallibriController.hasDevice)
 
     private val _devices = MutableLiveData<List<DeviceListItem>>()
@@ -31,6 +22,7 @@ class MenuViewModel : ViewModel() {
     val connectionError: LiveData<Boolean> = _connectionError
 
     fun updateConnectedDevices() {
+        connected.set(CallibriController.connectionState == SensorState.StateInRange)
         hasDevice.set(CallibriController.hasDevice)
 
         val devices = mutableListOf<DeviceListItem>()
@@ -40,8 +32,7 @@ class MenuViewModel : ViewModel() {
                     name = sensorInfo.name,
                     address = sensorInfo.address,
                     inProgress = false,
-                    sInfo = sensorInfo,
-                    isConnected = CallibriController.connectionState == SensorState.StateInRange
+                    sInfo = sensorInfo
                 )
             )
         }
@@ -57,7 +48,6 @@ class MenuViewModel : ViewModel() {
             viewModelScope.launch {
                 CallibriController.disconnectCurrent()
                 withContext(Dispatchers.Main) {
-                    _connected.postValue(false)
                     currentDevice.inProgress = false
                     updateConnectedDevices()
                     devicesListAdapter.notifyItemChanged(0)
@@ -66,11 +56,14 @@ class MenuViewModel : ViewModel() {
         } else {
             CallibriController.connectCurrent { state ->
                 viewModelScope.launch {
-                    _connected.postValue(state == SensorState.StateInRange)
                     currentDevice.inProgress = false
+                    connected.set(state == SensorState.StateInRange)
                     updateConnectedDevices()
                     devicesListAdapter.notifyItemChanged(0)
-                    _connectionError.postValue(state != SensorState.StateInRange)
+
+                    if (state != SensorState.StateInRange) {
+                        _connectionError.postValue(true)
+                    }
                 }
             }
         }
