@@ -84,6 +84,9 @@ object CallibriController {
                 sensor!!.sensorStateChanged = Sensor.SensorStateChanged { st ->
                     connectionStateChanged(st)
                 }
+                // Immediately trigger the state update
+                connectionStateChanged(sensor!!.state)
+
                 sensor!!.batteryChanged = Sensor.BatteryChanged { level ->
                     onBatteryChanged(level)
                 }
@@ -156,18 +159,14 @@ object CallibriController {
 
     fun disconnectCurrent() = runCatching {
         sensor?.disconnect()
-        // сбрасываем слушатели, чтобы не было “двойного” вызова
-        connectionStateChanged = { }
-        onBatteryChanged = { }
+        // Убрано сбрасывание обработчиков
     }
 
     fun closeSensor() = runCatching {
         sensor?.close()
         sensor = null
         currentSensorInfo = null
-        // тоже сброс на всякий случай
-        connectionStateChanged = { }
-        onBatteryChanged = { }
+        // Убрано сбрасывание обработчиков
     }
 
     val connectionState get() = sensor?.state
