@@ -16,12 +16,12 @@ import com.callibri.miograph.databinding.FragmentMenuBinding
 import com.neurosdk2.neuro.types.SensorState
 
 class MenuFragment : Fragment() {
-
     private var _binding: FragmentMenuBinding? = null
     private var _viewModel: MenuViewModel? = null
     private val binding get() = _binding!!
     private val viewModel get() = _viewModel!!
     private lateinit var devicesListAdapter: DevicesListAdapter
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,7 +45,7 @@ class MenuFragment : Fragment() {
                 CallibriController.closeSensor()
                 viewModel.updateConnectedDevices()
             },
-            isConnectedProvider = { viewModel.connected.get() }
+            isConnectedProvider = { viewModel.connected.value == true }
         )
 
         binding.viewModel = viewModel
@@ -59,12 +59,20 @@ class MenuFragment : Fragment() {
             findNavController().navigate(R.id.action_MenuFragment_to_SearchFragment)
         }
         binding.buttonEnvelope.setOnClickListener {
-            findNavController().navigate(R.id.action_MenuFragment_to_emgFragment)
+            if (CallibriController.connectionState == SensorState.StateInRange) {
+                findNavController().navigate(R.id.action_MenuFragment_to_emgFragment)
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.connection_lost_message),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
 
         viewModel.devices.observe(viewLifecycleOwner) { devices ->
             devicesListAdapter.updateDevices(devices)
-            devicesListAdapter.notifyDataSetChanged()
+            binding.buttonEnvelope.isEnabled = devices.any { it.isConnected }
         }
 
         viewModel.connectionError.observe(viewLifecycleOwner) { error ->
@@ -72,6 +80,11 @@ class MenuFragment : Fragment() {
                 Toast.makeText(requireContext(), "Connection failed!", Toast.LENGTH_SHORT).show()
                 viewModel.resetConnectionError()
             }
+        }
+
+        viewModel.connected.observe(viewLifecycleOwner) { isConnected ->
+            devicesListAdapter.notifyDataSetChanged()
+            viewModel.updateConnectedDevices()
         }
     }
 
@@ -86,10 +99,16 @@ class MenuFragment : Fragment() {
     }
 
     private fun showDeviceInfo() {
-        if(CallibriController.connectionState == SensorState.StateInRange) {
+        if (CallibriController.connectionState == SensorState.StateInRange) {
             findNavController().navigate(R.id.action_MenuFragment_to_infoFragment)
         } else {
             Toast.makeText(requireActivity(), "Connect to device first!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    companion object {
+        fun onViewCreated() {
+            this.onViewCreated()
         }
     }
 }

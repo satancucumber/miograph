@@ -112,6 +112,7 @@ object CallibriController {
 
                 // 6) возвращаем результат
                 withContext(Dispatchers.Main) {
+                    connectionStateChanged(sensor!!.state)
                     onConnectionResult(result)
                     if (result != SensorState.StateInRange) {
                         (context as? Activity)?.let {
@@ -163,7 +164,7 @@ object CallibriController {
 
     fun disconnectCurrent() = runCatching {
         sensor?.disconnect()
-        // Убрано сбрасывание обработчиков
+        connectionStateChanged(SensorState.StateOutOfRange)
     }
 
     fun closeSensor() = runCatching {
