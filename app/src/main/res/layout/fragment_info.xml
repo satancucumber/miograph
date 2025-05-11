@@ -23,7 +23,7 @@
 
             <TextView
                 android:id="@+id/colorTitle"
-                android:text="Sensor color"
+                android:text="@string/sensorColor"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginTop="16dp"
@@ -45,7 +45,7 @@
 
             <TextView
                 android:id="@+id/signalTypeTitle"
-                android:text="Signal type"
+                android:text="@string/signalType"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginTop="16dp"
@@ -67,7 +67,7 @@
 
             <TextView
                 android:id="@+id/signalTitle"
-                android:text="Parameters"
+                android:text="@string/parameters"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginTop="16dp"
@@ -82,7 +82,7 @@
 
             <TextView
                 android:id="@+id/commandsTitle"
-                android:text="Commands"
+                android:text="@string/commands"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginTop="16dp"
@@ -97,7 +97,7 @@
 
             <TextView
                 android:id="@+id/featuresTitle"
-                android:text="Features"
+                android:text="@string/features"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginTop="16dp"

@@ -69,7 +69,7 @@ class MenuFragment : Fragment() {
 
         viewModel.connectionError.observe(viewLifecycleOwner) { error ->
             if (error) {
-                Toast.makeText(requireContext(), "Connection failed!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.connection_failed_message), Toast.LENGTH_SHORT).show()
                 viewModel.resetConnectionError()
             }
         }
@@ -86,10 +86,8 @@ class MenuFragment : Fragment() {
     }
 
     private fun showDeviceInfo() {
-        if(CallibriController.connectionState == SensorState.StateInRange) {
+        if (CallibriController.connectionState == SensorState.StateInRange) {
             findNavController().navigate(R.id.action_MenuFragment_to_infoFragment)
-        } else {
-            Toast.makeText(requireActivity(), "Connect to device first!", Toast.LENGTH_SHORT).show()
         }
     }
 }

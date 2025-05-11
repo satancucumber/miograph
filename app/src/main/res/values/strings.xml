@@ -4,7 +4,7 @@
     <string name="search">Search</string>
     <string name="menu_fragment_label">Menu</string>
     <string name="info">Info</string>
-    <string name="envelope">EMG</string>
+    <string name="emg">EMG</string>
 
     <string name="start_search">Start search</string>
 
@@ -44,6 +44,13 @@
     </string-array>
 
     <string name="unknown_frequency">- Hz</string>
-    <string name="connection_failed_message">Connection failed</string>
+    <string name="connection_failed_message">Connection failed!</string>
     <string name="forget">Forget</string>
+    <string name="disconnect_message">Sensor disconnect!</string>
+    <string name="connection_success_message">Connection success!</string>
+    <string name="sensorColor">Sensor color</string>
+    <string name="signalType">Signal type</string>
+    <string name="parameters">Parameters</string>
+    <string name="commands">Commands</string>
+    <string name="features">Features</string>
 </resources>
