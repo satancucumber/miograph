@@ -19,7 +19,7 @@
 
     <string name="dev_state_connected">Connected</string>
     <string name="dev_state_disconnected">Disconnected</string>
-    <string name="dev_power_empty">-</string>
+    <string name="dev_power_empty">0%</string>
     <string name="dev_power_prc">%1$d %%</string>
 
     <string name="connected_sensors">Connected sensors: %d</string>
@@ -53,4 +53,9 @@
     <string name="parameters">Parameters</string>
     <string name="commands">Commands</string>
     <string name="features">Features</string>
+    <string name="language_english">English</string>
+    <string name="language_russian">Русский</string>
+    <string name="search_fragment_label">Search</string>
+    <string name="info_fragment_label">Info</string>
+    <string name="emg_fragment_label">EMG</string>
 </resources>

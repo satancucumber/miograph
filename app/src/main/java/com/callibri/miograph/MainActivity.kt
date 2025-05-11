@@ -1,7 +1,13 @@
 package com.callibri.miograph
 
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -16,20 +22,44 @@ import com.callibri.miograph.callibri.CallibriController
 import com.callibri.miograph.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(updateLocale(newBase))
+    }
+
+    private fun updateLocale(context: Context): Context {
+        val language = App.prefs.getString("language", "en") ?: "en"
+        val locale = Locale(language)
+        Locale.setDefault(locale)
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val config = Configuration(context.resources.configuration)
+            config.setLocale(locale)
+            context.createConfigurationContext(config)
+        } else {
+            val resources = context.resources
+            val config = Configuration(resources.configuration)
+            config.locale = locale
+            resources.updateConfiguration(config, resources.displayMetrics)
+            context
+        }
+    }
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        DynamicColors.applyToActivityIfAvailable(this)
-
+        updateLocale(this)
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        setupLanguageSelector()
 
         setSupportActionBar(binding.toolbar)
 
@@ -71,6 +101,42 @@ class MainActivity : AppCompatActivity() {
         CallibriController.onBatteryChanged = { level ->
             lifecycleScope.launch(Dispatchers.Main) {
                 binding.txtDevBatteryPower.text = getString(R.string.dev_power_prc, level)
+            }
+        }
+    }
+
+    private fun setupLanguageSelector() {
+        val languages = arrayOf(
+            getString(R.string.language_english),
+            getString(R.string.language_russian)
+        )
+
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            languages
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+        binding.toolbar.findViewById<Spinner>(R.id.languageSpinner).apply {
+            this.adapter = adapter
+            setSelection(if (App.prefs.getString("language", "en") == "en") 0 else 1)
+
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                    val lang = if (pos == 0) "en" else "ru"
+                    if (App.prefs.getString("language", "en") != lang) {
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            App.prefs.edit().putString("language", lang).apply()
+                            runOnUiThread {
+                                recreate()
+                            }
+                        }
+                    }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
         }
     }

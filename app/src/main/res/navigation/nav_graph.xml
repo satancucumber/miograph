@@ -23,15 +23,15 @@
     <fragment
         android:id="@+id/SearchFragment"
         android:name="com.callibri.miograph.screens.search.SearchScreenFragment"
-        android:label="Search"/>
+        android:label="@string/search_fragment_label"/>
     <fragment
         android:id="@+id/infoFragment"
         android:name="com.callibri.miograph.screens.info.InfoFragment"
-        android:label="Info"
+        android:label="@string/info_fragment_label"
         tools:layout="@layout/fragment_info" />
     <fragment
         android:id="@+id/emgFragment"
         android:name="com.callibri.miograph.screens.emg.EMGFragment"
-        android:label="Envelope"
+        android:label="@string/emg_fragment_label"
         tools:layout="@layout/fragment_emg" />
 </navigation>

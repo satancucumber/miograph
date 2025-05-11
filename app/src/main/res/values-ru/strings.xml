@@ -1,0 +1,61 @@
+<resources>
+    <string name="app_name">miograph</string>
+
+    <string name="search">Поиск</string>
+    <string name="menu_fragment_label">Меню</string>
+    <string name="info">Информация</string>
+    <string name="emg">ЭМГ</string>
+
+    <string name="start_search">Начать поиск</string>
+
+    <string name="start">Старт</string>
+    <string name="stop">Стоп</string>
+
+    <string name="disconnect">Отключить</string>
+    <string name="connect">Подключить</string>
+
+    <string name="dev_state_title">Статус:</string>
+    <string name="dev_power_title">Заряд:</string>
+
+    <string name="dev_state_connected">Подключен</string>
+    <string name="dev_state_disconnected">Отлючен</string>
+    <string name="dev_power_empty">0%</string>
+    <string name="dev_power_prc">%1$d %%</string>
+
+    <string name="connected_sensors">Подключенные датчики: %d</string>
+
+    <string name="overflow_desc">Больше</string>
+    <string name="export">Экспорт в CSV</string>
+    <string name="no_data_to_export">Нет данных для экспорта</string>
+    <string name="report_saved_to">Отчет сохранен в: %s</string>
+    <string name="export_failed">Экспорт провалился: %s</string>
+    <string name="frequency_hz_125">125 Гц</string>
+    <string name="frequency_hz_250">250 Гц</string>
+    <string name="frequency_hz_500">500 Гц</string>
+    <string name="frequency_hz_1000">1000 Гц</string>
+    <string name="frequency_hz_2000">2000 Гц</string>
+
+    <string-array name="sampling_frequencies">
+        <item>@string/frequency_hz_125</item>
+        <item>@string/frequency_hz_250</item>
+        <item>@string/frequency_hz_500</item>
+        <item>@string/frequency_hz_1000</item>
+        <item>@string/frequency_hz_2000</item>
+    </string-array>
+
+    <string name="unknown_frequency">- Гц</string>
+    <string name="connection_failed_message">Не удалось подключить!</string>
+    <string name="forget">Забыть</string>
+    <string name="disconnect_message">Датчик отключен!</string>
+    <string name="connection_success_message">Подключение успешно!</string>
+    <string name="sensorColor">Цвет датчика</string>
+    <string name="signalType">Тип сигнала</string>
+    <string name="parameters">Параметры</string>
+    <string name="commands">Команды</string>
+    <string name="features">Особенности</string>
+    <string name="language_english">English</string>
+    <string name="language_russian">Русский</string>
+    <string name="search_fragment_label">Поиск</string>
+    <string name="info_fragment_label">Информация</string>
+    <string name="emg_fragment_label">ЭМГ</string>
+</resources>
