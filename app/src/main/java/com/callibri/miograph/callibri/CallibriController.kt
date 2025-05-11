@@ -8,18 +8,14 @@ import com.callibri.miograph.data.SensorInfoModel
 import com.neurosdk2.neuro.Callibri
 import com.neurosdk2.neuro.Scanner
 import com.neurosdk2.neuro.Sensor
-import com.neurosdk2.neuro.interfaces.CallibriEnvelopeDataReceived
 import com.neurosdk2.neuro.interfaces.CallibriSignalDataReceived
 import com.neurosdk2.neuro.types.*
-import kotlinx.coroutines.runBlocking
-import kotlin.concurrent.thread
 import kotlinx.coroutines.*
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 
 object CallibriController {
-
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var currentJobs = mutableListOf<Job>()
     private const val CONNECT_TIMEOUT_MS = 10_000L
 
     private var scanner: Scanner? = null
@@ -61,30 +57,30 @@ object CallibriController {
         sensorInfo: SensorInfo,
         onConnectionResult: (SensorState) -> Unit
     ) {
-        thread {
+        val job = scope.launch {
             try {
                 // 1) создаём сенсор
                 sensor = scanner?.createSensor(sensorInfo) as? Callibri
                 currentSensorInfo = sensorInfo
 
                 if (sensor == null) {
-                    // нет устройства в зоне
-                    (context as? Activity)?.runOnUiThread {
+                    withContext(Dispatchers.Main) {
                         onConnectionResult(SensorState.StateOutOfRange)
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.connection_failed_message),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        (context as? Activity)?.let {
+                            Toast.makeText(
+                                it,
+                                it.getString(R.string.connection_failed_message),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
-                    return@thread
+                    return@launch
                 }
 
                 // 2) подписываемся на колбэки
                 sensor!!.sensorStateChanged = Sensor.SensorStateChanged { st ->
                     connectionStateChanged(st)
                 }
-                // Immediately trigger the state update
                 connectionStateChanged(sensor!!.state)
 
                 sensor!!.batteryChanged = Sensor.BatteryChanged { level ->
@@ -104,56 +100,64 @@ object CallibriController {
                 // 4) запускаем connect()
                 sensor!!.connect()
 
-                // 5) ждём результата в цикле до таймаута
-                val start = System.currentTimeMillis()
-                var result: SensorState
-                do {
-                    result = sensor!!.state
-                    if (result == SensorState.StateInRange) break
-                    Thread.sleep(200)
-                } while (System.currentTimeMillis() - start < CONNECT_TIMEOUT_MS)
+                // 5) ждём результата с таймаутом
+                val result = withTimeoutOrNull(CONNECT_TIMEOUT_MS) {
+                    while (isActive) {
+                        val state = sensor!!.state
+                        if (state == SensorState.StateInRange) return@withTimeoutOrNull state
+                        delay(200)
+                    }
+                    SensorState.StateOutOfRange
+                } ?: SensorState.StateOutOfRange
 
-                // 6) если не StateInRange по прошествии таймаута — считаем ошибкой
-                if (result != SensorState.StateInRange) {
-                    result = SensorState.StateOutOfRange
-                }
-
-                // 7) возвращаем результат на UI
-                (context as? Activity)?.runOnUiThread {
+                // 6) возвращаем результат
+                withContext(Dispatchers.Main) {
                     onConnectionResult(result)
                     if (result != SensorState.StateInRange) {
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.connection_failed_message),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        (context as? Activity)?.let {
+                            Toast.makeText(
+                                it,
+                                it.getString(R.string.connection_failed_message),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                (context as? Activity)?.runOnUiThread {
+                withContext(Dispatchers.Main) {
                     onConnectionResult(SensorState.StateOutOfRange)
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.connection_failed_message),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    (context as? Activity)?.let {
+                        Toast.makeText(
+                            it,
+                            it.getString(R.string.connection_failed_message),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             }
         }
+        currentJobs.add(job)
+        job.invokeOnCompletion { currentJobs.remove(job) }
     }
 
     fun connectCurrent(onConnectionResult: (SensorState) -> Unit) {
         sensor?.let { s ->
-            thread {
+            val job = scope.launch {
                 try {
                     s.connect()
-                    onConnectionResult(s.state)
+                    withContext(Dispatchers.Main) {
+                        onConnectionResult(s.state)
+                    }
                 } catch (ex: Exception) {
                     ex.printStackTrace()
-                    onConnectionResult(SensorState.StateOutOfRange)
+                    withContext(Dispatchers.Main) {
+                        onConnectionResult(SensorState.StateOutOfRange)
+                    }
                 }
             }
+            currentJobs.add(job)
+            job.invokeOnCompletion { currentJobs.remove(job) }
         }
     }
 
@@ -163,10 +167,11 @@ object CallibriController {
     }
 
     fun closeSensor() = runCatching {
+        currentJobs.forEach { it.cancel() }
+        currentJobs.clear()
         sensor?.close()
         sensor = null
         currentSensorInfo = null
-        // Убрано сбрасывание обработчиков
     }
 
     val connectionState get() = sensor?.state
@@ -259,38 +264,25 @@ object CallibriController {
         )
     }
 
-    fun startEnvelope(envelopeReceived: (Array<CallibriEnvelopeData>) -> Unit) {
-        sensor?.callibriEnvelopeDataReceived = CallibriEnvelopeDataReceived(envelopeReceived)
-        executeCommand(SensorCommand.StartEnvelope)
-    }
-
-    fun stopEnvelope() {
-        sensor?.callibriEnvelopeDataReceived = null
-
-        executeCommand(SensorCommand.StopEnvelope)
-    }
-
-    fun startSignal(signalReceived: (Array<CallibriSignalData>) -> Unit) {
+    suspend fun startSignal(signalReceived: (Array<CallibriSignalData>) -> Unit) {
         sensor?.callibriSignalDataReceived = CallibriSignalDataReceived(signalReceived)
         executeCommand(SensorCommand.StartSignal)
     }
 
-    fun stopSignal() {
+    suspend fun stopSignal() {
         sensor?.callibriSignalDataReceived = null
         executeCommand(SensorCommand.StopSignal)
     }
 
-    @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
-    private fun executeCommand(command: SensorCommand) =
-        runBlocking(newSingleThreadContext("dedicatedThread")) {
-            try {
-                if (sensor?.isSupportedCommand(command) == true) {
-                    sensor?.execCommand(command)
-                }
-            } catch (ex: Exception) {
-                ex.printStackTrace()
+    private suspend fun executeCommand(command: SensorCommand) = withContext(Dispatchers.IO) {
+        try {
+            if (sensor?.isSupportedCommand(command) == true) {
+                sensor?.execCommand(command)
             }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
         }
+    }
 
     fun getSamplingFrequency(): Float {
         return sensor?.samplingFrequency?.toFloat() ?: 0f

@@ -15,12 +15,14 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.callibri.miograph.R
 import com.callibri.miograph.callibri.CallibriController
 import com.callibri.miograph.callibri.toFloat
 import com.callibri.miograph.utils.PlotHolder
 import com.callibri.miograph.databinding.FragmentEmgBinding
 import com.neurosdk2.neuro.types.SensorSamplingFrequency
+import kotlinx.coroutines.launch
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
@@ -92,7 +94,9 @@ class EMGFragment : Fragment() {
         }
 
         binding.emgButton.setOnClickListener {
-            viewModel.onStartClicked()
+            lifecycleScope.launch {
+                viewModel.onStartClicked()
+            }
         }
         binding.exportButton.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -119,7 +123,9 @@ class EMGFragment : Fragment() {
         super.onDestroyView()
         _binding = null
 
-        viewModel.close()
+        lifecycleScope.launch {
+            viewModel.close()
+        }
     }
 
     private val CREATE_FILE_REQUEST_CODE = 42

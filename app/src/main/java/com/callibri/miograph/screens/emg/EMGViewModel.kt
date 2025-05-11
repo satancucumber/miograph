@@ -5,12 +5,15 @@ import android.content.Context
 import android.media.MediaScannerConnection
 import android.os.Environment
 import androidx.databinding.ObservableBoolean
-import androidx.databinding.ObservableField
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.callibri.miograph.R
 import com.callibri.miograph.callibri.CallibriController
 import com.callibri.miograph.data.SensorData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileWriter
 import java.text.SimpleDateFormat
@@ -18,6 +21,7 @@ import java.util.Date
 import java.util.Locale
 
 class EMGViewModel : ViewModel() {
+    private var job: Job? = null
     var started = ObservableBoolean(false)
     val isSessionCompleted = ObservableBoolean(false)
     val exportStatus = MutableLiveData<String>()
@@ -30,8 +34,9 @@ class EMGViewModel : ViewModel() {
     private var startTime: Long = 0
     private var sampleIndex: Int = 0
 
-    fun onStartClicked() {
+    suspend fun onStartClicked() {
         if (started.get()) {
+            job?.cancel()
             CallibriController.stopSignal()
             isSessionCompleted.set(true)
         } else {
@@ -40,17 +45,30 @@ class EMGViewModel : ViewModel() {
             val sensorAddress = CallibriController.currentSensorInfo?.address ?: "Unknown"
             val sampleFrequency = CallibriController.getSamplingFrequency()
 
-            CallibriController.startSignal { signalDataArray ->
-                val res = arrayListOf<Double>()
-                for (sample in signalDataArray) {
-                    res.addAll(sample.samples.toList())
-                }
-                samples.postValue(res)
-                val currentTime = System.currentTimeMillis()
-                val interval = (1000.0 / sampleFrequency).toLong()
-                res.forEachIndexed { index, signalData ->
-                    val timestamp = currentTime - (signalDataArray.size - index - 1) * interval
-                    recordedData.add(SensorData(sensorName, sensorAddress, timestamp, signalData))
+            job = viewModelScope.launch {
+                CallibriController.startSignal { signalDataArray ->
+                    val res = arrayListOf<Double>()
+                    for (sample in signalDataArray) {
+                        res.addAll(sample.samples.toList())
+                    }
+                    samples.postValue(res)
+
+                    val currentTime = System.currentTimeMillis()
+                    val interval = (1000.0 / sampleFrequency).toLong()
+
+                    launch(Dispatchers.Default) {
+                        res.forEachIndexed { index, signalData ->
+                            val timestamp = currentTime - (signalDataArray.size - index - 1) * interval
+                            recordedData.add(
+                                SensorData(
+                                    sensorName,
+                                    sensorAddress,
+                                    timestamp,
+                                    signalData
+                                )
+                            )
+                        }
+                    }
                 }
             }
             isSessionCompleted.set(false)
@@ -96,7 +114,7 @@ class EMGViewModel : ViewModel() {
         return sdf.format(Date(timestamp))
     }
 
-    fun close(){
+    suspend fun close(){
         CallibriController.stopSignal()
     }
 }

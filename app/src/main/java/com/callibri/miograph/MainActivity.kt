@@ -3,6 +3,7 @@ package com.callibri.miograph
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -12,6 +13,8 @@ import com.google.android.material.elevation.SurfaceColors
 import com.neurosdk2.neuro.types.SensorState
 import com.callibri.miograph.callibri.CallibriController
 import com.callibri.miograph.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
@@ -40,13 +43,14 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        CallibriController.connectionStateChanged = {
-            runOnUiThread {
-                binding.txtDevState.text =
-                    if (it == SensorState.StateInRange) getString(R.string.dev_state_connected)
-                    else getString(R.string.dev_state_disconnected)
+        CallibriController.connectionStateChanged = { state ->
+            lifecycleScope.launch(Dispatchers.Main) {
+                binding.txtDevState.text = if (state == SensorState.StateInRange)
+                    getString(R.string.dev_state_connected)
+                else
+                    getString(R.string.dev_state_disconnected)
 
-                if (it == SensorState.StateOutOfRange) {
+                if (state == SensorState.StateOutOfRange) {
                     binding.txtDevBatteryPower.text = getString(R.string.dev_power_prc, 0)
                     navController.popBackStack(R.id.MenuFragment, false)
                 }
@@ -54,15 +58,19 @@ class MainActivity : AppCompatActivity() {
         }
 
         CallibriController.onBatteryChanged = { level ->
-            runOnUiThread {
+            lifecycleScope.launch(Dispatchers.Main) {
                 binding.txtDevBatteryPower.text = getString(R.string.dev_power_prc, level)
             }
-
         }
     }
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        CallibriController.closeSensor()
     }
 }

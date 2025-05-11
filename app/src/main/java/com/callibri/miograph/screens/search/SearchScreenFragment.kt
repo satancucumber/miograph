@@ -12,9 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.neurosdk2.helpers.PermissionHelper
-import com.neurosdk2.neuro.types.SensorState
 import com.callibri.miograph.R
-import com.callibri.miograph.callibri.CallibriController
 import com.callibri.miograph.databinding.FragmentSearchScreenBinding
 
 class SearchScreenFragment : Fragment() {
@@ -48,7 +46,7 @@ class SearchScreenFragment : Fragment() {
     private fun setupRecyclerView() {
         devicesListAdapter = DevicesListAdapter(
             devices = mutableListOf(),
-            onConnectClick = { device -> handleConnect(device)}
+            onConnectClick = { device -> viewModel.connectToDevice(requireContext(), device) }
         )
 
         binding.searchDevicesList.apply {
@@ -58,16 +56,26 @@ class SearchScreenFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        viewModel.sensors.observe(viewLifecycleOwner) { sensors ->
-            val deviceList = sensors.map { sensorInfo ->
-                DeviceListItem(
-                    name = sensorInfo.name,
-                    address = sensorInfo.address,
-                    inProgress = false,
-                    sInfo = sensorInfo
-                )
+        viewModel.devices.observe(viewLifecycleOwner) { devices ->
+            devicesListAdapter.updateDevices(devices)
+        }
+
+        viewModel.navigateToMenu.observe(viewLifecycleOwner) { navigate ->
+            if (navigate) {
+                findNavController().popBackStack(R.id.MenuFragment, false)
+                viewModel.resetNavigateToMenu()
             }
-            devicesListAdapter.updateDevices(deviceList)
+        }
+
+        viewModel.connectionError.observe(viewLifecycleOwner) { error ->
+            if (error) {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.connection_failed_message),
+                    Toast.LENGTH_SHORT
+                ).show()
+                viewModel.resetConnectionError()
+            }
         }
     }
 
@@ -75,8 +83,8 @@ class SearchScreenFragment : Fragment() {
     private fun setupButtonListeners() {
         binding.buttonRestart.setOnClickListener {
             if (!PermissionHelper.HasAllPermissions(requireContext())) {
-                PermissionHelper.RequestPermissions(requireContext()) {
-                        _, _, _ -> viewModel.onSearchClicked()
+                PermissionHelper.RequestPermissions(requireContext()) { _, _, _ ->
+                    viewModel.onSearchClicked()
                 }
             } else {
                 viewModel.onSearchClicked()
@@ -84,35 +92,9 @@ class SearchScreenFragment : Fragment() {
         }
     }
 
-    private fun handleConnect(device: DeviceListItem) {
-        device.inProgress = true
-        devicesListAdapter.notifyItemChanged(devicesListAdapter.devices.indexOf(device))
-
-        CallibriController.createAndConnect(requireContext(), device.sInfo) { state ->
-            activity?.runOnUiThread {
-                device.inProgress = false
-                devicesListAdapter.notifyItemChanged(devicesListAdapter.devices.indexOf(device))
-
-                when (state) {
-                    SensorState.StateInRange -> {
-                        findNavController().popBackStack(R.id.MenuFragment, false)
-                    }
-                    else -> {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.connection_failed_message),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            }
-        }
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        // при выходе со SearchScreen очищаем сканер, чтобы после возвращения список не “зависал”
-        CallibriController.stopSearch()
+        viewModel.close()
     }
 }

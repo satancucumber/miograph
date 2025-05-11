@@ -14,7 +14,6 @@ import com.callibri.miograph.R
 import com.callibri.miograph.callibri.CallibriController
 import com.callibri.miograph.databinding.FragmentMenuBinding
 import com.neurosdk2.neuro.types.SensorState
-import kotlin.concurrent.thread
 
 class MenuFragment : Fragment() {
 
@@ -37,11 +36,10 @@ class MenuFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Инициализация адаптера с добавлением ViewModel и обработчика Info
         devicesListAdapter = DevicesListAdapter(
             devices = mutableListOf(),
-            onConnectClick = { reconnect() },
-            onDisconnectClick = { reconnect() },
+            onConnectClick = { viewModel.reconnect(devicesListAdapter) },
+            onDisconnectClick = { viewModel.reconnect(devicesListAdapter) },
             onInfoClick = { showDeviceInfo() },
             onForgetClick = {
                 CallibriController.closeSensor()
@@ -52,13 +50,11 @@ class MenuFragment : Fragment() {
 
         binding.viewModel = viewModel
 
-        // Настройка RecyclerView
         binding.sensorsList.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = devicesListAdapter
         }
 
-        // Кнопки
         binding.buttonSearch.setOnClickListener {
             findNavController().navigate(R.id.action_MenuFragment_to_SearchFragment)
         }
@@ -66,49 +62,16 @@ class MenuFragment : Fragment() {
             findNavController().navigate(R.id.action_MenuFragment_to_emgFragment)
         }
 
-        // Наблюдение за списком устройств
         viewModel.devices.observe(viewLifecycleOwner) { devices ->
             devicesListAdapter.updateDevices(devices)
             devicesListAdapter.notifyDataSetChanged()
         }
-    }
 
-    private fun reconnect() {
-        // Получаем текущее устройство из ViewModel
-        val currentDevice = viewModel.devices.value?.firstOrNull() ?: return
-
-        // Начало процесса
-        currentDevice.inProgress = true
-        devicesListAdapter.notifyItemChanged(0) // Обновляем первую позицию
-
-        if (CallibriController.connectionState == SensorState.StateInRange) {
-            // Процесс отключения
-            thread {
-                CallibriController.disconnectCurrent()
-                activity?.runOnUiThread {
-                    currentDevice.inProgress = false
-                    viewModel.updateConnectedDevices()
-                    devicesListAdapter.notifyItemChanged(0)
-                }
+        viewModel.connectionError.observe(viewLifecycleOwner) { error ->
+            if (error) {
+                Toast.makeText(requireContext(), "Connection failed!", Toast.LENGTH_SHORT).show()
+                viewModel.resetConnectionError()
             }
-        } else {
-            // Процесс подключения
-            CallibriController.connectCurrent(onConnectionResult = { state ->
-                activity?.runOnUiThread {
-                    currentDevice.inProgress = false
-                    viewModel.connected.set(state == SensorState.StateInRange)
-                    viewModel.updateConnectedDevices()
-                    devicesListAdapter.notifyItemChanged(0)
-
-                    if (state != SensorState.StateInRange) {
-                        Toast.makeText(
-                            requireContext(),
-                            "Connection failed!",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            })
         }
     }
 
@@ -123,10 +86,9 @@ class MenuFragment : Fragment() {
     }
 
     private fun showDeviceInfo() {
-        if(CallibriController.connectionState == SensorState.StateInRange){
+        if(CallibriController.connectionState == SensorState.StateInRange) {
             findNavController().navigate(R.id.action_MenuFragment_to_infoFragment)
-        }
-        else {
+        } else {
             Toast.makeText(requireActivity(), "Connect to device first!", Toast.LENGTH_SHORT).show()
         }
     }
