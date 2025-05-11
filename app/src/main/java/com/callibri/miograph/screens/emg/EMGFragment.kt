@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -132,6 +133,7 @@ class EMGFragment : Fragment() {
         startActivityForResult(intent, CREATE_FILE_REQUEST_CODE)
     }
 
+    @SuppressLint("Range")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == CREATE_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
@@ -143,7 +145,15 @@ class EMGFragment : Fragment() {
                             writer.write("${data.sensorName},${data.sensorAddress},${formatTimestamp(data.timestamp)},${data.value}\n")
                         }
                     }
-                    Toast.makeText(context, R.string.report_saved_to, Toast.LENGTH_LONG).show()
+                    // Получаем имя файла из Uri
+                    var fileName: String? = null
+                    requireContext().contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            fileName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                        }
+                    }
+                    val message = requireContext().getString(R.string.report_saved_to, fileName ?: "report.csv")
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 }
             }
         }
