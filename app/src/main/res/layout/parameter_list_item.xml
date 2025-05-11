@@ -15,7 +15,6 @@
         android:background="@drawable/item_border"
         android:padding="16dp">
 
-        <!-- Название параметра -->
         <TextView
             android:id="@+id/paramName"
             android:layout_width="0dp"
@@ -23,11 +22,11 @@
             android:text="@{parameter.name}"
             android:textColor="?attr/colorOnSurface"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/paramValue"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/paramValue"/>
+            app:layout_constraintTop_toTopOf="parent"/>
 
-        <!-- Доступ -->
         <TextView
             android:id="@+id/paramAccess"
             android:layout_width="wrap_content"
@@ -39,7 +38,6 @@
             app:layout_constraintTop_toBottomOf="@id/paramName"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <!-- Значение -->
         <TextView
             android:id="@+id/paramValue"
             android:layout_width="0dp"
@@ -48,10 +46,10 @@
             android:textColor="?attr/colorOnSurfaceVariant"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
             android:gravity="end"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/paramName"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/paramName"
+            app:layout_constraintTop_toTopOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
