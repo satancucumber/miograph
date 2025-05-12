@@ -38,8 +38,8 @@ object CallibriController {
             }
             scanner?.sensorsChanged = Scanner.ScannerCallback(sensorsChanged)
             scanner?.start()
-        } catch (ex: Exception) {
-            ex.printStackTrace()
+        } catch (t: Throwable) {
+            t.printStackTrace()  // ловим и Error (UnsatisfiedLinkError) тоже
         }
     }
 
@@ -57,6 +57,19 @@ object CallibriController {
         sensorInfo: SensorInfo,
         onConnectionResult: (SensorState) -> Unit
     ) {
+        // Если сканер не инициализирован, сразу сообщаем OutOfRange
+        if (scanner == null) {
+            onConnectionResult(SensorState.StateOutOfRange)
+            (context as? Activity)?.let {
+                Toast.makeText(
+                    it,
+                    it.getString(R.string.connection_failed_message),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            return
+        }
+
         val job = scope.launch {
             try {
                 // 1) создаём сенсор
@@ -90,7 +103,9 @@ object CallibriController {
                 // 3) настраиваем параметры
                 runCatching {
                     sensor!!.samplingFrequency = SensorSamplingFrequency.FrequencyHz1000
-                    sensor!!.signalType = CallibriSignalType.EMG
+                    if (sensor is Callibri) {
+                        (sensor as Callibri).signalType = CallibriSignalType.EMG
+                    }
                     sensor!!.hardwareFilters = listOf(
                         SensorFilter.FilterBSFBwhLvl2CutoffFreq45_55Hz,
                         SensorFilter.FilterHPFBwhLvl1CutoffFreq1Hz

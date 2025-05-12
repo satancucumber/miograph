@@ -16,15 +16,20 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
 kotlinxCoroutinesAndroid = "1.7.3"
+kotlinxCoroutinesTest = "1.6.4"
 legacySupportV4 = "1.0.0"
 lifecycleLivedataKtx = "2.8.7"
 material = "1.12.0"
 mockitoCore = "5.12.0"
+mockitoCoreVersion = "3.12.4"
 mockitoInline = "4.11.0"
 mockitoKotlin = "5.4.0"
+mockitoKotlinVersion = "3.2.0"
 navVersion = "2.8.0"
 neurosdk2 = "1.0.6.29"
+powermockModuleJunit4 = "2.0.9"
 robolectric = "4.10.3"
+robolectricVersion = "4.9"
 signalfilters = "1.0"
 androidxCoreKtx = "1.6.1"
 
@@ -53,13 +58,19 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-coroutines-test-v164 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockitoInline" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
+mockito-core-v3124 = { module = "org.mockito:mockito-core", version.ref = "mockitoCoreVersion" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+mockito-kotlin-v320 = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlinVersion" }
 neurosdk2 = { module = "com.github.BrainbitLLC:neurosdk2", version.ref = "neurosdk2" }
+powermock-api-mockito2 = { module = "org.powermock:powermock-api-mockito2", version.ref = "powermockModuleJunit4" }
+powermock-module-junit4 = { module = "org.powermock:powermock-module-junit4", version.ref = "powermockModuleJunit4" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+robolectric-v49 = { module = "org.robolectric:robolectric", version.ref = "robolectricVersion" }
 signalfilters = { module = "com.github.BrainbitLLC:SignalFilters", version.ref = "signalfilters" }
 spectrumlib = { module = "com.github.BrainbitLLC:SpectrumLib", version.ref = "emotionalStateArtifacts" }
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "androidxCoreKtx" }

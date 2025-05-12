@@ -52,6 +52,16 @@ android {
         pickFirst("lib/armeabi-v7a/libfilters.so")
         pickFirst("lib/arm64-v8a/libfilters.so")
     }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all { test ->
+            test.jvmArgs(
+                "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED"
+            )
+        }
+    }
 }
 
 dependencies {
