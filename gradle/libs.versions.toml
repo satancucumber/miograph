@@ -6,6 +6,7 @@ appcompatVersion = "1.6.1"
 callibriecg = "1.0.0"
 constraintlayout = "2.2.1"
 coreKtxVersion = "1.13.1"
+coreTesting = "2.2.0"
 emotionalStateArtifacts = "1.0.1"
 espressoCoreVersion = "3.5.1"
 kotlin = "1.9.0"
@@ -18,16 +19,23 @@ kotlinxCoroutinesAndroid = "1.7.3"
 legacySupportV4 = "1.0.0"
 lifecycleLivedataKtx = "2.8.7"
 material = "1.12.0"
+mockitoCore = "5.12.0"
+mockitoInline = "4.11.0"
+mockitoKotlin = "5.4.0"
 navVersion = "2.8.0"
 neurosdk2 = "1.0.6.29"
+robolectric = "4.10.3"
 signalfilters = "1.0"
+androidxCoreKtx = "1.6.1"
 
 [libraries]
 androidplot-core = { module = "com.androidplot:androidplot-core", version.ref = "androidplotCore" }
 androidx-appcompat-v161 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+androidx-core = { module = "androidx.test:core", version.ref = "androidxCoreKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-ktx-v1131 = { module = "androidx.core:core-ktx", version.ref = "coreKtxVersion" }
+androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-espresso-core-v351 = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
 androidx-junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 androidx-legacy-support-v4 = { module = "androidx.legacy:legacy-support-v4", version.ref = "legacySupportV4" }
@@ -44,10 +52,17 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesAndroid" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockitoInline" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
+mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 neurosdk2 = { module = "com.github.BrainbitLLC:neurosdk2", version.ref = "neurosdk2" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 signalfilters = { module = "com.github.BrainbitLLC:SignalFilters", version.ref = "signalfilters" }
 spectrumlib = { module = "com.github.BrainbitLLC:SpectrumLib", version.ref = "emotionalStateArtifacts" }
+core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "androidxCoreKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

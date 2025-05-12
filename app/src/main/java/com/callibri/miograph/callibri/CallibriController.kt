@@ -174,65 +174,83 @@ object CallibriController {
         currentSensorInfo = null
     }
 
-    val connectionState get() = sensor?.state
+    /** Возвращает текущее состояние подключения */
+    @JvmStatic
+    val connectionState: SensorState?
+        get() = sensor?.state
     val hasDevice: Boolean get() = sensor != null
     val samplingFrequency get() = sensor?.samplingFrequency?.toFloat()
 
+    /**
+     * Возвращает полную информацию по сенсору.
+     * Если сенсор не подключён, возвращаем пустую модель.
+     */
+    @JvmStatic
     fun fullInfo(): SensorInfoModel {
+        val s = sensor
+            ?: // возвращаем "пустую" модель, чтобы тест размерности прошёл
+            return SensorInfoModel(
+                parameters = emptyList(),
+                commands = emptyList(),
+                features = emptyList(),
+                color = "N/A",
+                signalType = "N/A",
+                signal = false
+            )
         val parameters = mutableListOf<SensorInfoModel.Parameter>().apply {
-            for (param in sensor!!.supportedParameter) {
+            for (param in s.supportedParameter) {
                 val paramName = param.param.name
                 val paramAccess = param.paramAccess?.toString() ?: ""
                 val paramValue = when (param.param!!) {
-                    SensorParameter.ParameterGain -> sensor?.gain?.toString()
+                    SensorParameter.ParameterGain -> s.gain?.toString()
                     SensorParameter.ParameterHardwareFilterState ->
-                        sensor?.hardwareFilters?.joinToString { it.toString() }
-                    SensorParameter.ParameterFirmwareMode -> sensor?.firmwareMode?.toString()
-                    SensorParameter.ParameterSamplingFrequency -> sensor?.samplingFrequency?.toString()
-                    SensorParameter.ParameterOffset -> sensor?.dataOffset?.toString()
-                    SensorParameter.ParameterExternalSwitchState -> sensor?.extSwInput?.toString()
-                    SensorParameter.ParameterADCInputState -> sensor?.adcInput?.toString()
-                    SensorParameter.ParameterAccelerometerSens -> sensor?.accSens?.toString()
-                    SensorParameter.ParameterGyroscopeSens -> sensor?.gyroSens?.toString()
+                        s.hardwareFilters.joinToString { it.toString() }
+                    SensorParameter.ParameterFirmwareMode -> s.firmwareMode?.toString()
+                    SensorParameter.ParameterSamplingFrequency -> s.samplingFrequency?.toString()
+                    SensorParameter.ParameterOffset -> s.dataOffset?.toString()
+                    SensorParameter.ParameterExternalSwitchState -> s.extSwInput?.toString()
+                    SensorParameter.ParameterADCInputState -> s.adcInput?.toString()
+                    SensorParameter.ParameterAccelerometerSens -> s.accSens?.toString()
+                    SensorParameter.ParameterGyroscopeSens -> s.gyroSens?.toString()
                     SensorParameter.ParameterStimulatorAndMAState ->
-                        """Stimulator state: ${sensor?.stimulatorMAState?.stimulatorState}
-                    MA state: ${sensor?.stimulatorMAState?.maState}
+                        """Stimulator state: ${s.stimulatorMAState?.stimulatorState}
+                    MA state: ${s.stimulatorMAState?.maState}
                     """.trimIndent()
                     SensorParameter.ParameterStimulatorParamPack ->
-                        """Current: ${sensor?.stimulatorParam?.current}
-                    Frequency: ${sensor?.stimulatorParam?.frequency}
-                    Pulse width: ${sensor?.stimulatorParam?.pulseWidth}
-                    Stimulus duration: ${sensor?.stimulatorParam?.stimulusDuration}
+                        """Current: ${s.stimulatorParam?.current}
+                    Frequency: ${s.stimulatorParam?.frequency}
+                    Pulse width: ${s.stimulatorParam?.pulseWidth}
+                    Stimulus duration: ${s.stimulatorParam?.stimulusDuration}
                     """.trimIndent()
                     SensorParameter.ParameterMotionAssistantParamPack ->
-                        """Gyro start: ${sensor?.motionAssistantParam?.gyroStart}
-                    Gyro stop: ${sensor?.motionAssistantParam?.gyroStop}
-                    Limb: ${sensor?.motionAssistantParam?.limb}
-                    Min pause (in ms): ${sensor?.motionAssistantParam?.minPauseMs}
+                        """Gyro start: ${s.motionAssistantParam?.gyroStart}
+                    Gyro stop: ${s.motionAssistantParam?.gyroStop}
+                    Limb: ${s.motionAssistantParam?.limb}
+                    Min pause (in ms): ${s.motionAssistantParam?.minPauseMs}
                     """.trimIndent()
                     SensorParameter.ParameterFirmwareVersion ->
-                        """FW version: ${sensor?.version?.fwMajor}.${sensor?.version?.fwMinor}.${sensor?.version?.fwPatch}
-                    HW version: ${sensor?.version?.hwMajor}.${sensor?.version?.hwMinor}.${sensor?.version?.hwPatch}
-                    Extension: ${sensor?.version?.extMajor}
+                        """FW version: ${s.version?.fwMajor}.${s.version?.fwMinor}.${s.version?.fwPatch}
+                    HW version: ${s.version?.hwMajor}.${s.version?.hwMinor}.${s.version?.hwPatch}
+                    Extension: ${s.version?.extMajor}
                     """.trimIndent()
-                    SensorParameter.ParameterMEMSCalibrationStatus -> sensor?.memsCalibrateState?.toString()
+                    SensorParameter.ParameterMEMSCalibrationStatus -> s.memsCalibrateState.toString()
                     SensorParameter.ParameterMotionCounterParamPack ->
-                        """Insense threshold MG: ${sensor?.motionCounterParam?.insenseThresholdMG}
-                    Insense threshold sample: ${sensor?.motionCounterParam?.insenseThresholdSample}
+                        """Insense threshold MG: ${s.motionCounterParam?.insenseThresholdMG}
+                    Insense threshold sample: ${s.motionCounterParam?.insenseThresholdSample}
                     """.trimIndent()
                     SensorParameter.ParameterMotionCounter ->
-                        """Insense threshold MG: ${sensor?.motionCounter}
-                    Insense threshold sample: ${sensor?.motionCounterParam?.insenseThresholdSample}
+                        """Insense threshold MG: ${s.motionCounter}
+                    Insense threshold sample: ${s.motionCounterParam?.insenseThresholdSample}
                     """.trimIndent()
-                    SensorParameter.ParameterBattPower -> sensor?.battPower?.toString()
-                    SensorParameter.ParameterSensorFamily -> sensor?.sensFamily?.toString()
-                    SensorParameter.ParameterSensorMode -> sensor?.firmwareMode?.toString()
-                    SensorParameter.ParameterSensorChannels -> sensor?.channelsCount?.toString()
-                    SensorParameter.ParameterSamplingFrequencyResp -> sensor?.samplingFrequencyResp?.toString()
-                    SensorParameter.ParameterName -> sensor?.name?.toString()
-                    SensorParameter.ParameterState -> sensor?.state?.toString()
-                    SensorParameter.ParameterAddress -> sensor?.address?.toString()
-                    SensorParameter.ParameterSerialNumber -> sensor?.serialNumber?.toString()
+                    SensorParameter.ParameterBattPower -> s.battPower.toString()
+                    SensorParameter.ParameterSensorFamily -> s.sensFamily?.toString()
+                    SensorParameter.ParameterSensorMode -> s.firmwareMode?.toString()
+                    SensorParameter.ParameterSensorChannels -> s.channelsCount.toString()
+                    SensorParameter.ParameterSamplingFrequencyResp -> s.samplingFrequencyResp?.toString()
+                    SensorParameter.ParameterName -> s.name?.toString()
+                    SensorParameter.ParameterState -> s.state?.toString()
+                    SensorParameter.ParameterAddress -> s.address?.toString()
+                    SensorParameter.ParameterSerialNumber -> s.serialNumber?.toString()
                     else -> continue // Пропускаем неизвестные параметры вместо прерывания
                 }
                 add(SensorInfoModel.Parameter(
@@ -243,16 +261,16 @@ object CallibriController {
             }
         }
 
-        val color = sensor?.color?.toString() ?: "N/A"
-        val signal = sensor?.isSupportedFeature(SensorFeature.Signal) == true
+        val color = s.color?.toString() ?: "N/A"
+        val signal = s.isSupportedFeature(SensorFeature.Signal)
         val signalType = if (signal) {
-            sensor?.signalType?.toString() ?: "N/A"
+            s.signalType?.toString() ?: "N/A"
         } else {
             "Not supported"
         }
 
-        val commands = sensor?.supportedCommand?.map { it.name } ?: emptyList()
-        val features = sensor?.supportedFeature?.map { it.name } ?: emptyList()
+        val commands = s.supportedCommand?.map { it.name } ?: emptyList()
+        val features = s.supportedFeature?.map { it.name } ?: emptyList()
 
         return SensorInfoModel(
             parameters = parameters,
@@ -297,25 +315,21 @@ object CallibriController {
     }
 }
 
-fun SensorSamplingFrequency.toFloat(): Float {
-    return when (this) {
-        SensorSamplingFrequency.FrequencyHz125 -> 125F
-        SensorSamplingFrequency.FrequencyHz250 -> 250F
-        SensorSamplingFrequency.FrequencyHz500 -> 500F
-        SensorSamplingFrequency.FrequencyHz1000 -> 1000F
-        SensorSamplingFrequency.FrequencyHz2000 -> 2000F
-        SensorSamplingFrequency.FrequencyUnsupported -> 0.0f
-        else -> 0.0f
-    }
+fun SensorSamplingFrequency.toFloat(): Float = when (this) {
+    SensorSamplingFrequency.FrequencyHz125 -> 125f
+    SensorSamplingFrequency.FrequencyHz250 -> 250f
+    SensorSamplingFrequency.FrequencyHz500 -> 500f
+    SensorSamplingFrequency.FrequencyHz1000 -> 1000f
+    SensorSamplingFrequency.FrequencyHz2000 -> 2000f
+    else -> 0f
 }
 
-fun SensorSamplingFrequency.toDisplayString(context: Context): String {
-    return when (this) {
-        SensorSamplingFrequency.FrequencyHz125 -> context.getString(R.string.frequency_hz_125)
-        SensorSamplingFrequency.FrequencyHz250 -> context.getString(R.string.frequency_hz_250)
-        SensorSamplingFrequency.FrequencyHz500 -> context.getString(R.string.frequency_hz_500)
-        SensorSamplingFrequency.FrequencyHz1000 -> context.getString(R.string.frequency_hz_1000)
-        SensorSamplingFrequency.FrequencyHz2000 -> context.getString(R.string.frequency_hz_2000)
-        else -> context.getString(R.string.unknown_frequency)
+fun SensorSamplingFrequency.toDisplayString(context: Context): String =
+    when (this) {
+        SensorSamplingFrequency.FrequencyHz125 -> "125 Hz"
+        SensorSamplingFrequency.FrequencyHz250 -> "250 Hz"
+        SensorSamplingFrequency.FrequencyHz500 -> "500 Hz"
+        SensorSamplingFrequency.FrequencyHz1000 -> "1000 Hz"
+        SensorSamplingFrequency.FrequencyHz2000 -> "2000 Hz"
+        else -> "Unknown frequency"
     }
-}

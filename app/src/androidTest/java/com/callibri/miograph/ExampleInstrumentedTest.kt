@@ -8,17 +8,26 @@ import org.junit.runner.RunWith
 
 import org.junit.Assert.*
 
+import com.callibri.miograph.callibri.toDisplayString
+import com.neurosdk2.neuro.types.SensorSamplingFrequency
+import org.junit.Assert.*
+
+
 /**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
+ * Instrumented tests that run on an Android device/emulator.
  */
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
     @Test
     fun useAppContext() {
-        // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("com.callibri.miograph", appContext.packageName)
+    }
+
+    @Test
+    fun frequencyDisplay_instrumented() {
+        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        val disp = SensorSamplingFrequency.FrequencyHz500.toDisplayString(appContext)
+        assertTrue(disp.contains("500"))
     }
 }
