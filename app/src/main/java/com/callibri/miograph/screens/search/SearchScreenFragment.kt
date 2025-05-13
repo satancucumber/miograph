@@ -31,6 +31,8 @@ class SearchScreenFragment : Fragment() {
     ): View {
         _binding = FragmentSearchScreenBinding.inflate(inflater, container, false)
         _viewModel = ViewModelProvider(this)[SearchScreenViewModel::class.java]
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
     }
 
