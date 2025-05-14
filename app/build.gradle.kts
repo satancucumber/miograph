@@ -65,6 +65,14 @@ android {
 }
 
 dependencies {
+    debugImplementation(libs.androidx.fragment.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.core.testing)
+    androidTestImplementation(libs.androidx.espresso.intents)
+    debugImplementation(libs.androidx.fragment.testing)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.rules)
+    androidTestImplementation(libs.androidx.junit)
     testImplementation(libs.androidx.core.testing)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.core)

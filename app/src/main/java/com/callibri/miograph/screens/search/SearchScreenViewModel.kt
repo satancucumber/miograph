@@ -90,6 +90,10 @@ class SearchScreenViewModel : ViewModel() {
         }
     }
 
+    fun setDevices(devices: List<DeviceListItem>) {
+        _devices.postValue(devices)
+    }
+
     fun resetConnectionError() {
         _connectionError.value = false
     }

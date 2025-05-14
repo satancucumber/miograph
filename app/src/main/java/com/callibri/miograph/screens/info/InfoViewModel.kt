@@ -13,4 +13,8 @@ class InfoViewModel : ViewModel() {
     fun loadSensorInfo() {
         _sensorInfo.postValue(CallibriController.fullInfo())
     }
+
+    fun setSensorInfo(info: SensorInfoModel) {
+        _sensorInfo.postValue(info)
+    }
 }

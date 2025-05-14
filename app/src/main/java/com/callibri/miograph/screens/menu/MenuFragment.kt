@@ -16,9 +16,8 @@ import com.callibri.miograph.databinding.FragmentMenuBinding
 import com.neurosdk2.neuro.types.SensorState
 
 class MenuFragment : Fragment() {
-
     private var _binding: FragmentMenuBinding? = null
-    private var _viewModel: MenuViewModel? = null
+    lateinit var _viewModel: MenuViewModel
     private val binding get() = _binding!!
     private val viewModel get() = _viewModel!!
     private lateinit var devicesListAdapter: DevicesListAdapter

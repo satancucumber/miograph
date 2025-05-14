@@ -18,7 +18,7 @@ import com.callibri.miograph.databinding.FragmentSearchScreenBinding
 class SearchScreenFragment : Fragment() {
 
     private var _binding: FragmentSearchScreenBinding? = null
-    private var _viewModel: SearchScreenViewModel? = null
+    lateinit var _viewModel: SearchScreenViewModel
     private val binding get() = _binding!!
     private val viewModel get() = _viewModel!!
 
